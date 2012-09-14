@@ -1,0 +1,32 @@
+# Configuration file for autoscale extension to hector-client
+#
+# All timers / limits are listed in seconds
+#
+
+#
+# Autoscale turned on or off
+autoscale: true
+
+#
+# How often autoscale should run (seconds)
+intervall_timer: 1
+
+#
+# Minimum number of nodes. If reach this number, 
+# nodes will no longer be scaled down, only up
+min_number_of_nodes: 1
+
+#
+# Memory usage (percentage)
+memory_options:
+     max_free_memory: 90.0
+     min_free_memory: 10.0
+     threshold_breach_limit: 10
+
+     
+#
+# Disk usage (megabytes)
+disk_options:
+     max_free_usage_mb: 20000
+     min_free_usage_mb: 60
+     threshold_breach_limit: 10
