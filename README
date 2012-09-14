@@ -3,4 +3,19 @@ Hector Autoscale module
 
 Extension to hector, for autoscaling of a Cassandra cluster.
 
-Currently a master thesis work done by Andreas Baakind @ University of Oslo (toraba at ifi dot uio dot no).
+Currently a master thesis work done by Andreas Baakind at University of Oslo (toraba at ifi dot uio dot no).
+
+
+
+HOWTO
+===============
+1. Goto https://github.com/hector-client/hector and download hector-client sourcecode
+2. Download autoscale sourcode, and copy to hector/autoscale
+2. open pom.xml, and append autoscale as a module
+3. Build hector-client from master-pom
+
+
+
+CONFIG
+==============
+Parameters may be changed from src/main/resources/autoscale.yaml
