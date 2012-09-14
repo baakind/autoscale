@@ -1,0 +1,6 @@
+Hector Autoscale module
+================
+
+Extension to hector, for autoscaling of a Cassandra cluster.
+
+Currently a master thesis work done by Andreas Baakind @ University of Oslo (toraba at ifi dot uio dot no).
