@@ -13,6 +13,7 @@ import me.prettyprint.cassandra.service.JmxMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uio.autoscale.util.TextUtils;
+
 /**
  * Autoscale for cassandra cluster
  * @author toraba
