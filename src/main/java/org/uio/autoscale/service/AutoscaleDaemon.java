@@ -33,7 +33,6 @@ public class AutoscaleDaemon implements Runnable {
 		System.out.println("***************** AUTOSCALE RUN *****************");
 		try {
 			Thread.sleep(1000);
-			instance;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
