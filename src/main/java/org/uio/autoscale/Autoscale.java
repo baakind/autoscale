@@ -10,12 +10,15 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.JmxMonitor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.uio.autoscale.util.TextUtils;
 /**
  * Autoscale for cassandra cluster
  * @author toraba
  */
 public class Autoscale {
+	private static Logger LOG = LoggerFactory.getLogger(Autoscale.class);
 	
 	private static String CLUSTER_NAME;
 	private static String DEFAULT_HOST = "127.0.0.1";
@@ -29,6 +32,7 @@ public class Autoscale {
 	}
 	
 	public Autoscale(String clusterName, String... defaultHosts) {
+		LOG.debug("Init autoscale");
 		init(clusterName, defaultHosts);
 	}
 	

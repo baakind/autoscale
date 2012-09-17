@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>org.uio.toraba</groupId>
+	<groupId>org.uio</groupId>
 	<artifactId>autoscale</artifactId>
 	<name>Autoscale implementation for Cassandra</name>
 	<packaging>jar</packaging>
@@ -9,12 +9,6 @@
 
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.6</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
@@ -57,6 +51,22 @@
       		<artifactId>cassandra-thrift</artifactId>
       		<version>1.1.3</version>
     	</dependency>
+    	
+    	<dependency>
+            <groupId>mockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>0.999.10</version>
+            <scope>test</scope>
+        </dependency>
+    	
+      	<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+
+
     
 	</dependencies>
 
@@ -85,6 +95,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			
 		</plugins>
 	</build>
 
@@ -93,4 +104,16 @@
     	<project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   	</properties>
+  	
+  	
+  	<repositories>
+        <repository>
+            <id>jmockit-svn</id>
+            <url>http://jmockit.googlecode.com/svn/maven-repo</url>
+            <releases>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+    </repositories>
+  	
 </project>
