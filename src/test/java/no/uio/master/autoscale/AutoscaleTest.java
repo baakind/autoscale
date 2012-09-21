@@ -1,4 +1,6 @@
-package org.uio.autoscale;
+package no.uio.master.autoscale;
+
+import no.uio.master.autoscale.Autoscale;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
