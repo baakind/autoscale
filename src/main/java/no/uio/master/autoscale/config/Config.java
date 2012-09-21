@@ -3,7 +3,7 @@ package no.uio.master.autoscale.config;
 import me.prettyprint.hector.api.Cluster;
 
 public class Config {
-	public Integer intervall_timer = 1;
+	public Integer intervall_timer = 1; 
 	public Integer threshold_breach_limit = 10;
 	public Integer min_number_of_nodes = 1;
 	public Double min_memory_usage = 10.0;

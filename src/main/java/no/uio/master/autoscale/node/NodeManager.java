@@ -22,7 +22,7 @@ public class NodeManager {
 	/**
 	 * Initialize new Cassandra-host object in memory
 	 * @param host
-	 * @param port
+	 * @param port 
 	 * @return
 	 */
 	public CassandraHost initNewHost(String host, int port) {

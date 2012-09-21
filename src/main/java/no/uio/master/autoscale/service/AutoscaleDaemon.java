@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The runnable instance of Autoscale, for external usage.
  * @author toraba
- *
+ * 
  */
 public class AutoscaleDaemon implements Runnable{
 	private static Logger LOG = LoggerFactory.getLogger(AutoscaleDaemon.class);
@@ -54,8 +54,6 @@ public class AutoscaleDaemon implements Runnable{
 	public void run() {
 		String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
 		LOG.debug(msg);
-		
-		//TOOD: Feiler når CPUList hentes  
-		//clusterMonitor.monitor();
+
 	}
 }

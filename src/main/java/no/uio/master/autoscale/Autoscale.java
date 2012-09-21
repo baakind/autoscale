@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Initial startup for autoscale implementation.
- * @author toraba
+ * @author toraba 
  */
 public class Autoscale {
 	private static Logger LOG = LoggerFactory.getLogger(Autoscale.class);
