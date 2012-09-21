@@ -31,7 +31,7 @@ public class Autoscale {
 	}
 	
 	
-	public Autoscale(Integer intervallTimer, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, Cluster c) {
+	public Autoscale(Cluster c, Integer intervallTimer, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace) {
 		LOG.info("Initializing autoscaling...");
 		instance = new AutoscaleDaemon(c);
 		
