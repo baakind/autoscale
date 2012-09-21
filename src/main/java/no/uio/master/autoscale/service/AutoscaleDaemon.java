@@ -1,7 +1,6 @@
 package no.uio.master.autoscale.service;
 
 import java.util.HashSet;
-import java.util.Properties;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
@@ -9,6 +8,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.hector.api.Cluster;
 import no.uio.master.autoscale.config.Config;
+import no.uio.master.autoscale.net.ClusterMonitor;
 import no.uio.master.autoscale.node.NodeManager;
 
 import org.slf4j.Logger;
@@ -25,6 +25,7 @@ public class AutoscaleDaemon implements Runnable{
 	private static CassandraClientMonitor monitor;
 	private static Config config = new Config();
 	private static NodeManager nodeManager;
+	private static ClusterMonitor clusterMonitor;
 	
 	/**
 	 * Initialize autoscaler
@@ -42,6 +43,7 @@ public class AutoscaleDaemon implements Runnable{
 		nodeManager.setInactiveNodes(new HashSet<CassandraHost>(0));
 		nodeManager.setActiveNodes(connectionManager.getHosts());
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
+		clusterMonitor = new ClusterMonitor();
 	}
 	
 	public Config getConfig() {
@@ -52,5 +54,8 @@ public class AutoscaleDaemon implements Runnable{
 	public void run() {
 		String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
 		LOG.debug(msg);
+		
+		//TOOD: Feiler når CPUList hentes  
+		//clusterMonitor.monitor();
 	}
 }
