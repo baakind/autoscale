@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>org.uio</groupId>
+	<groupId>no.uio.master</groupId>
 	<artifactId>autoscale</artifactId>
 	<name>Autoscale implementation for Cassandra</name>
 	<packaging>jar</packaging>
@@ -70,6 +70,12 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>13.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.fusesource</groupId>
+			<artifactId>sigar</artifactId>
+			<version>1.6.4</version>
 		</dependency>
     
 	</dependencies>

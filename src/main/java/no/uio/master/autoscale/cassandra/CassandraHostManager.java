@@ -1,4 +1,4 @@
-package no.uio.master.autoscale.node;
+package no.uio.master.autoscale.cassandra;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -8,14 +8,14 @@ import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.JmxMonitor;
 
-public class NodeManager {
+public class CassandraHostManager {
 
 	private Set<CassandraHost> inactiveNodes;
 	private Set<CassandraHost> activeNodes;
 	private HConnectionManager connectionManager;
 	private static CassandraClientMonitor monitor;
 	
-	public NodeManager(HConnectionManager connectionManager) {
+	public CassandraHostManager(HConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 	}
