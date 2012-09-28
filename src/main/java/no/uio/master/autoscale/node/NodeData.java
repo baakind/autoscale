@@ -68,7 +68,7 @@ public class NodeData {
 			Map<String,Object> env = new HashMap<String,Object>();
 			
 			if(username != null) {
-				String[] creds = { username, password };
+				//String[] creds = { username, password };
 				env.put(JMXConnector.CREDENTIALS, env);
 			}
 			
