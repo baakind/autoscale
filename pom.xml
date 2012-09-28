@@ -77,6 +77,13 @@
 			<artifactId>sigar</artifactId>
 			<version>1.6.4</version>
 		</dependency>
+		
+		<!-- Autoscale-slave dependency LOCAL -->
+		<dependency>
+   			<groupId>no.uio.master</groupId>
+			<artifactId>autoscale-slave</artifactId>
+    		<version>1.0.0-SNAPSHOT</version>
+		</dependency>
     
 	</dependencies>
 

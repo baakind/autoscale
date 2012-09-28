@@ -36,6 +36,8 @@ public class NodeData {
 	private MBeanServerConnection mbeanServerConn;
 	private MemoryMXBean memoryMXBean;
 	
+	private JMXServiceURL jmxUrl;
+	
 	public NodeData(String host, int port, String username , String password) throws IOException {
 		assert username != null && !username.isEmpty() && password != null && !password.isEmpty()
 	               : "neither username nor password can be blank";
@@ -44,38 +46,42 @@ public class NodeData {
 	        this.port = port;
 	        this.username = username;
 	        this.password = password;
+	        generateJMXServiceUrl(fmtUrl, host, port);
 	}
 	
 	public NodeData(String host, int port) throws IOException {
 		LOG.debug("Initialize host: " + host + ", port: " + port);
 		this.host = host;
         this.port = port;
+        generateJMXServiceUrl(fmtUrl, host, port);
 	}
 	
 	public NodeData(String host) throws IOException {
 		LOG.debug("Initialize host: " + host);
 		this.host = host;
         this.port = defaultPort;
+        generateJMXServiceUrl(fmtUrl, host, port);
 	}
 	
 	public void connect() throws IOException  {
 			LOG.debug("Connect init...");
-			JMXServiceURL jmxUrl = null;
-				jmxUrl = new JMXServiceURL(String.format(fmtUrl, host, port));
-
 			Map<String,Object> env = new HashMap<String,Object>();
+			
 			if(username != null) {
 				String[] creds = { username, password };
 				env.put(JMXConnector.CREDENTIALS, env);
 			}
-				jmxc = JMXConnectorFactory.connect(jmxUrl,env);
-				mbeanServerConn = jmxc.getMBeanServerConnection();
+			
+			jmxc = JMXConnectorFactory.connect(jmxUrl,env);
+			mbeanServerConn = jmxc.getMBeanServerConnection();
 			
 			// MemoryMXBean
-				memoryMXBean = ManagementFactory.newPlatformMXBeanProxy(mbeanServerConn, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
+			//memoryMXBean = ManagementFactory.getMemoryMXBean();
+			memoryMXBean = ManagementFactory.newPlatformMXBeanProxy(mbeanServerConn, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
+			
 			LOG.debug("Connected");
 	}
-	
+
 	public void close() throws IOException {
         jmxc.close();
     }
@@ -128,4 +134,9 @@ public class NodeData {
 	public String toString() {
 		return "NodeData [host=" + host + ", port=" + port + "]";
 	}
+
+	private void generateJMXServiceUrl(String url, String h, Integer p) throws MalformedURLException {
+		jmxUrl = new JMXServiceURL(String.format(url, h, p));
+	}
 }
+

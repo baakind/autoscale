@@ -49,7 +49,7 @@ public class NodeMonitor {
 				return data.get(ipAdr).heapMemoryUsed();
 			}
 		} catch (IOException e) {
-			LOG.error("Failed to get heap memory usage for host: " + ipAdr);
+			LOG.error("Failed to get heap memory usage for host: " + ipAdr,e);
 			throw new RuntimeException(e);
 		} 
 		return null;
