@@ -28,7 +28,7 @@ public class NodeMonitor {
 		try {
 			for (Iterator<CassandraHost> iterator = nodes.iterator(); iterator.hasNext();) {
 				CassandraHost cassandraHost = iterator.next();
-				data.put(cassandraHost.getHost(), new NodeData(cassandraHost.getIp(), cassandraHost.getPort()));
+				data.put(cassandraHost.getHost(), new NodeData(cassandraHost.getIp()));//cassandraHost.getPort()));
 			}
 		} catch (IOException e) {
 			LOG.error("Failed to initialize Nodemonitor");

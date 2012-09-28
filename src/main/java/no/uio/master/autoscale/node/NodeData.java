@@ -57,7 +57,7 @@ public class NodeData {
 	}
 	
 	public NodeData(String host) throws IOException {
-		LOG.debug("Initialize host: " + host);
+		LOG.debug("Initialize host: " + host + ", defaultPort: " + defaultPort);
 		this.host = host;
         this.port = defaultPort;
         generateJMXServiceUrl(fmtUrl, host, port);
@@ -76,7 +76,6 @@ public class NodeData {
 			mbeanServerConn = jmxc.getMBeanServerConnection();
 			
 			// MemoryMXBean
-			//memoryMXBean = ManagementFactory.getMemoryMXBean();
 			memoryMXBean = ManagementFactory.newPlatformMXBeanProxy(mbeanServerConn, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
 			
 			LOG.debug("Connected");

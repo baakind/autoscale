@@ -55,7 +55,7 @@ public class AutoscaleDaemon implements Runnable {
 	@Override
 	public void run() {
 		String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
-			//msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
+			msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
 		LOG.debug(msg);
 	}
 
