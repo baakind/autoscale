@@ -14,6 +14,7 @@ import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.node.NodeMonitor;
 import no.uio.master.autoscale.slave.SlaveCommunicator;
 import no.uio.master.autoslave.model.SlaveMessage;
+import no.uio.master.autoslave.model.enumerator.SlaveMessageType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class AutoscaleDaemon implements Runnable {
 		nodeManager.setActiveNodes(connectionManager.getHosts());
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 		nodeMonitor = new NodeMonitor(nodeManager.getActiveNodes());
-		
+		initializeSlaves();
 	}
 	
 	public Config getConfig() {
@@ -61,18 +62,32 @@ public class AutoscaleDaemon implements Runnable {
 		String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
 			msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
 		//LOG.debug(msg);
+			LOG.debug("Daemon running...");
+	}
+	
+	/**
+	 * Send initialization-message to all slaves.
+	 */
+	public void initializeSlaves() {
 		
-			
-		try {
-			socket = new Socket("localhost",7799);
-		} catch (IOException e) {
-			LOG.error("Failed to init serversocket - ",e);
-			throw new RuntimeException(e);
+		// Construct message
+		SlaveMessage slaveMsg = new SlaveMessage(SlaveMessageType.INITIALIZATION);
+		slaveMsg.put("intervall_timer", getConfig().intervall_timer);
+		slaveMsg.put("threshold_breach_limit", getConfig().threshold_breach_limit);
+		slaveMsg.put("min_memory_usage", getConfig().min_memory_usage);
+		slaveMsg.put("max_memory_usage", getConfig().max_memory_usage);
+		slaveMsg.put("min_free_disk_space",getConfig().min_free_disk_space);
+		slaveMsg.put("max_free_disk_space",getConfig().max_free_disk_space);
+		
+		// Send message to all slaves
+		for(CassandraHost host : nodeManager.getActiveNodes()) {
+			try {
+				socket = new Socket(host.getHost(),7799);
+			} catch (IOException e) {
+				LOG.error("Failed to init connection with ");
+			}
+			SlaveCommunicator.sendMessage(slaveMsg, socket);
 		}
-		
-		SlaveMessage slaveMsg = new SlaveMessage();
-		slaveMsg.setMessage("Test melding");
-		SlaveCommunicator.sendMessage(slaveMsg, socket);
 	}
 
 	
