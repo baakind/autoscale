@@ -1,5 +1,7 @@
 package no.uio.master.autoscale.service;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.HashSet;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
@@ -9,8 +11,9 @@ import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.hector.api.Cluster;
 import no.uio.master.autoscale.cassandra.CassandraHostManager;
 import no.uio.master.autoscale.config.Config;
-import no.uio.master.autoscale.node.NodeData;
 import no.uio.master.autoscale.node.NodeMonitor;
+import no.uio.master.autoscale.slave.SlaveCommunicator;
+import no.uio.master.autoslave.model.SlaveMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +31,7 @@ public class AutoscaleDaemon implements Runnable {
 	private static CassandraHostManager nodeManager;
 	private static NodeMonitor nodeMonitor;
 	
-	
+	private static Socket socket;
 	/**
 	 * Initialize autoscaler
 	 * @param clusterName
@@ -46,6 +49,7 @@ public class AutoscaleDaemon implements Runnable {
 		nodeManager.setActiveNodes(connectionManager.getHosts());
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 		nodeMonitor = new NodeMonitor(nodeManager.getActiveNodes());
+		
 	}
 	
 	public Config getConfig() {
@@ -56,7 +60,19 @@ public class AutoscaleDaemon implements Runnable {
 	public void run() {
 		String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
 			msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
-		LOG.debug(msg);
+		//LOG.debug(msg);
+		
+			
+		try {
+			socket = new Socket("localhost",7799);
+		} catch (IOException e) {
+			LOG.error("Failed to init serversocket - ",e);
+			throw new RuntimeException(e);
+		}
+		
+		SlaveMessage slaveMsg = new SlaveMessage();
+		slaveMsg.setMessage("Test melding");
+		SlaveCommunicator.sendMessage(slaveMsg, socket);
 	}
 
 	
