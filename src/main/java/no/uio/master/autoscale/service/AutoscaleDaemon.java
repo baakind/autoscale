@@ -11,10 +11,10 @@ import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.hector.api.Cluster;
 import no.uio.master.autoscale.cassandra.CassandraHostManager;
 import no.uio.master.autoscale.config.Config;
+import no.uio.master.autoscale.model.SlaveMessage;
+import no.uio.master.autoscale.model.enumerator.SlaveMessageType;
 import no.uio.master.autoscale.node.NodeMonitor;
 import no.uio.master.autoscale.slave.SlaveCommunicator;
-import no.uio.master.model.SlaveMessage;
-import no.uio.master.model.enumerator.SlaveMessageType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +59,8 @@ public class AutoscaleDaemon implements Runnable {
 	
 	@Override
 	public void run() {
-		String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
-			msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
+		//String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
+		//	msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
 		//LOG.debug(msg);
 			LOG.debug("Daemon running...");
 	}
@@ -78,6 +78,7 @@ public class AutoscaleDaemon implements Runnable {
 		slaveMsg.put("max_memory_usage", getConfig().max_memory_usage);
 		slaveMsg.put("min_free_disk_space",getConfig().min_free_disk_space);
 		slaveMsg.put("max_free_disk_space",getConfig().max_free_disk_space);
+		slaveMsg.put("storage_location", getConfig().storage_location);
 		
 		// Send message to all slaves
 		for(CassandraHost host : nodeManager.getActiveNodes()) {

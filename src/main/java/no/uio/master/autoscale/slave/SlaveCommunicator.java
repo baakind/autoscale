@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 
-import no.uio.master.model.SlaveMessage;
+import no.uio.master.autoscale.model.SlaveMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

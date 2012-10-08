@@ -31,7 +31,7 @@ public class Autoscale {
 	}
 	
 	
-	public Autoscale(Cluster c, Integer intervallTimer, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace) {
+	public Autoscale(Cluster c, Integer intervallTimer, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, String storageLocation) {
 		LOG.info("Initializing autoscaling...");
 		instance = new AutoscaleDaemon(c);
 		
@@ -42,6 +42,7 @@ public class Autoscale {
 		instance.getConfig().max_memory_usage = maxMemoryUsage;
 		instance.getConfig().min_free_disk_space = minDiskSpace;
 		instance.getConfig().max_free_disk_space = maxDiskSpace;
+		instance.getConfig().storage_location = storageLocation;
 		instance.getConfig().cluster = c;
 		
 		init();

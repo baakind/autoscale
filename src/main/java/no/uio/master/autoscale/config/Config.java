@@ -10,5 +10,6 @@ public class Config {
 	public Double max_memory_usage = 90.0;
 	public Long min_free_disk_space = 60L;
 	public Long max_free_disk_space = 20000L;
+	public String storage_location = "/";
 	public Cluster cluster = null;
 }
