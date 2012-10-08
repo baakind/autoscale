@@ -13,8 +13,8 @@ import no.uio.master.autoscale.cassandra.CassandraHostManager;
 import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.node.NodeMonitor;
 import no.uio.master.autoscale.slave.SlaveCommunicator;
-import no.uio.master.autoslave.model.SlaveMessage;
-import no.uio.master.autoslave.model.enumerator.SlaveMessageType;
+import no.uio.master.model.SlaveMessage;
+import no.uio.master.model.enumerator.SlaveMessageType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

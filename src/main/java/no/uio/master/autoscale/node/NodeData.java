@@ -12,6 +12,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+
 import no.uio.master.autoscale.Autoscale;
 
 import org.slf4j.Logger;
