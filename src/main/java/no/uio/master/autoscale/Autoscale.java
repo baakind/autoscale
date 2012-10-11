@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.hector.api.Cluster;
+import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.service.AutoscaleDaemon;
 
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class Autoscale {
 	public Autoscale(Cluster c) {
 		LOG.info("Initializing autoscaling with default properties...");
 		instance = new AutoscaleDaemon(c);
-		instance.getConfig().cluster = c;
+		Config.cluster = c;
 		init();
 	}
 	
@@ -35,15 +36,15 @@ public class Autoscale {
 		LOG.info("Initializing autoscaling...");
 		instance = new AutoscaleDaemon(c);
 		
-		instance.getConfig().intervall_timer = intervallTimer;
-		instance.getConfig().threshold_breach_limit = thresholdBreachLimit;
-		instance.getConfig().min_number_of_nodes = minNumberOfNodes;
-		instance.getConfig().min_memory_usage = minMemoryUsage;
-		instance.getConfig().max_memory_usage = maxMemoryUsage;
-		instance.getConfig().min_free_disk_space = minDiskSpace;
-		instance.getConfig().max_free_disk_space = maxDiskSpace;
-		instance.getConfig().storage_location = storageLocation;
-		instance.getConfig().cluster = c;
+		Config.intervall_timer = intervallTimer;
+		Config.threshold_breach_limit = thresholdBreachLimit;
+		Config.min_number_of_nodes = minNumberOfNodes;
+		Config.min_memory_usage = minMemoryUsage;
+		Config.max_memory_usage = maxMemoryUsage;
+		Config.min_free_disk_space = minDiskSpace;
+		Config.max_free_disk_space = maxDiskSpace;
+		Config.storage_location = storageLocation;
+		Config.cluster = c;
 		
 		init();
 	}
@@ -51,7 +52,7 @@ public class Autoscale {
 	private void init() {
 		
 		executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(instance, 0, instance.getConfig().intervall_timer, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(instance, 0, Config.intervall_timer, TimeUnit.SECONDS);
 		
 		LOG.info("Initializing autoscaling complete");
 	}

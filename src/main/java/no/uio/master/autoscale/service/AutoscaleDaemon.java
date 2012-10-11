@@ -1,8 +1,9 @@
 package no.uio.master.autoscale.service;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.util.HashSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
@@ -11,10 +12,10 @@ import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.hector.api.Cluster;
 import no.uio.master.autoscale.cassandra.CassandraHostManager;
 import no.uio.master.autoscale.config.Config;
-import no.uio.master.autoscale.model.SlaveMessage;
-import no.uio.master.autoscale.model.enumerator.SlaveMessageType;
 import no.uio.master.autoscale.node.NodeMonitor;
-import no.uio.master.autoscale.slave.SlaveCommunicator;
+import no.uio.master.autoscale.slave.message.SlaveMessage;
+import no.uio.master.autoscale.slave.message.enumerator.SlaveMessageType;
+import no.uio.master.autoscale.slave.net.Communicator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,11 @@ public class AutoscaleDaemon implements Runnable {
 	private static CassandraHostManager nodeManager;
 	private static NodeMonitor nodeMonitor;
 	
-	private static Socket socket;
+	private static Communicator communicator;
+	
+	private static SlaveListener slaveListener;
+	private static ScheduledExecutorService executor;
+	
 	/**
 	 * Initialize autoscaler
 	 * @param clusterName
@@ -51,10 +56,7 @@ public class AutoscaleDaemon implements Runnable {
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 		nodeMonitor = new NodeMonitor(nodeManager.getActiveNodes());
 		initializeSlaves();
-	}
-	
-	public Config getConfig() {
-		return config;
+		initSlaveMessageListener();
 	}
 	
 	@Override
@@ -72,23 +74,41 @@ public class AutoscaleDaemon implements Runnable {
 		
 		// Construct message
 		SlaveMessage slaveMsg = new SlaveMessage(SlaveMessageType.INITIALIZATION);
-		slaveMsg.put("intervall_timer", getConfig().intervall_timer);
-		slaveMsg.put("threshold_breach_limit", getConfig().threshold_breach_limit);
-		slaveMsg.put("min_memory_usage", getConfig().min_memory_usage);
-		slaveMsg.put("max_memory_usage", getConfig().max_memory_usage);
-		slaveMsg.put("min_free_disk_space",getConfig().min_free_disk_space);
-		slaveMsg.put("max_free_disk_space",getConfig().max_free_disk_space);
-		slaveMsg.put("storage_location", getConfig().storage_location);
+		slaveMsg.put("intervall_timer", Config.intervall_timer);
+		slaveMsg.put("threshold_breach_limit", Config.threshold_breach_limit);
+		slaveMsg.put("min_memory_usage", Config.min_memory_usage);
+		slaveMsg.put("max_memory_usage", Config.max_memory_usage);
+		slaveMsg.put("min_free_disk_space",Config.min_free_disk_space);
+		slaveMsg.put("max_free_disk_space",Config.max_free_disk_space);
+		slaveMsg.put("storage_location", Config.storage_location);
+		
+		String masterHost = "127.0.0.1";
+//TODO: Remove this later, to retrieve the actual ip-address
+//		try {
+//			InetAddress ownIp=InetAddress.getLocalHost();
+//			masterHost = ownIp.getHostAddress();
+//		} catch (UnknownHostException e1) {
+//			LOG.debug("Failed to retrieve master-ip");
+//		}
+		slaveMsg.put("master_host", masterHost);
 		
 		// Send message to all slaves
 		for(CassandraHost host : nodeManager.getActiveNodes()) {
-			try {
-				socket = new Socket(host.getHost(),7799);
-			} catch (IOException e) {
-				LOG.error("Failed to init connection with ");
-			}
-			SlaveCommunicator.sendMessage(slaveMsg, socket);
+			communicator = new Communicator(Config.master_input_port, Config.master_output_port);
+			communicator.sendMessage(host.getHost(), slaveMsg);
+			communicator = null;
 		}
+	}
+	
+	public void initSlaveMessageListener() {
+		LOG.debug("Slave message listener initialized");
+		try {
+			slaveListener = new SlaveListener();
+		} catch (Exception e) {
+			LOG.error("Failed to initialize slave-listener");
+		}
+		executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(slaveListener, 0, 1, TimeUnit.SECONDS);
 	}
 
 	
