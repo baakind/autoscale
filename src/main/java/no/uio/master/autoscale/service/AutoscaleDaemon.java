@@ -81,16 +81,7 @@ public class AutoscaleDaemon implements Runnable {
 		slaveMsg.put("min_free_disk_space",Config.min_free_disk_space);
 		slaveMsg.put("max_free_disk_space",Config.max_free_disk_space);
 		slaveMsg.put("storage_location", Config.storage_location);
-		
-		String masterHost = "127.0.0.1";
-//TODO: Remove this later, to retrieve the actual ip-address
-//		try {
-//			InetAddress ownIp=InetAddress.getLocalHost();
-//			masterHost = ownIp.getHostAddress();
-//		} catch (UnknownHostException e1) {
-//			LOG.debug("Failed to retrieve master-ip");
-//		}
-		slaveMsg.put("master_host", masterHost);
+
 		
 		// Send message to all slaves
 		for(CassandraHost host : nodeManager.getActiveNodes()) {

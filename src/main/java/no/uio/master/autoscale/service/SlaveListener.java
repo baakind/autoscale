@@ -2,7 +2,7 @@ package no.uio.master.autoscale.service;
 
 
 import no.uio.master.autoscale.config.Config;
-import no.uio.master.autoscale.slave.message.SlaveMessage;
+import no.uio.master.autoscale.slave.message.BreachMessage;
 import no.uio.master.autoscale.slave.net.Communicator;
 
 import org.slf4j.Logger;
@@ -25,14 +25,18 @@ public class SlaveListener implements Runnable {
 	
 	@Override
 	public void run() {
-		LOG.debug("Listen for incomming slave-messages...");
-		//SlaveMessage msg = (SlaveMessage)communicator.readMessage();
+		LOG.debug("Listen for incomming messages...");
 		Object msg = communicator.readMessage();
 		performAction(msg);
 	}
 
+	/**
+	 * Perform action upon received object
+	 * @param msg
+	 */
 	public void performAction(Object msg) {
-		LOG.debug("Message read: " + (String)msg);
+		BreachMessage<?> breachMessage = (BreachMessage<?>)msg;
+		LOG.debug("Message read: " + breachMessage);
 	}
 	
 
