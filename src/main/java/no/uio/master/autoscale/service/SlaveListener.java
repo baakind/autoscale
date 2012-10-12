@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * Listen for messages comming from the slave(s)
  * @author andreas
  */
-public class SlaveListener implements Runnable {
+public class SlaveListener {
 
 	private static Logger LOG = LoggerFactory.getLogger(SlaveListener.class);
 	
@@ -23,8 +23,10 @@ public class SlaveListener implements Runnable {
 		communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 	}
 	
-	@Override
-	public void run() {
+	/**
+	 * Listen for incomming messages
+	 */
+	public void listenForMessage() {
 		LOG.debug("Listen for incomming messages...");
 		Object msg = communicator.readMessage();
 		performAction(msg);

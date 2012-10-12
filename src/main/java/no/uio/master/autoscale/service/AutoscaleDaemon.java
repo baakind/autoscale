@@ -56,15 +56,13 @@ public class AutoscaleDaemon implements Runnable {
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 		nodeMonitor = new NodeMonitor(nodeManager.getActiveNodes());
 		initializeSlaves();
-		initSlaveMessageListener();
+		slaveListener = new SlaveListener();
 	}
 	
 	@Override
 	public void run() {
-		//String msg = "InactiveNodes: " + nodeManager.getNumberOfInactiveHosts() + ", ActiveNodes: " + nodeManager.getNumberOfActiveHosts();
-		//	msg += "\n Heap usage: " + nodeMonitor.getHeapMemoryUsage("127.0.0.1");
-		//LOG.debug(msg);
 			LOG.debug("Daemon running...");
+			slaveListener.listenForMessage();
 	}
 	
 	/**
@@ -89,17 +87,6 @@ public class AutoscaleDaemon implements Runnable {
 			communicator.sendMessage(host.getHost(), slaveMsg);
 			communicator = null;
 		}
-	}
-	
-	public void initSlaveMessageListener() {
-		LOG.debug("Slave message listener initialized");
-		try {
-			slaveListener = new SlaveListener();
-		} catch (Exception e) {
-			LOG.error("Failed to initialize slave-listener");
-		}
-		executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(slaveListener, 0, 1, TimeUnit.SECONDS);
 	}
 
 	
