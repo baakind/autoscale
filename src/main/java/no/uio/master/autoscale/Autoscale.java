@@ -32,11 +32,12 @@ public class Autoscale {
 	}
 	
 	
-	public Autoscale(Cluster c, Integer intervallTimer, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, String storageLocation) {
+	public Autoscale(Cluster c, Integer intervallTimerScaler, Integer intervallTimerSlave, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, String storageLocation) {
 		LOG.info("Initializing autoscaling...");
 		instance = new AutoscaleDaemon(c);
 		
-		Config.intervall_timer = intervallTimer;
+		Config.intervall_timer_slave = intervallTimerSlave;
+		Config.intervall_timer_scaler = intervallTimerScaler;
 		Config.threshold_breach_limit = thresholdBreachLimit;
 		Config.min_number_of_nodes = minNumberOfNodes;
 		Config.min_memory_usage = minMemoryUsage;
@@ -52,7 +53,7 @@ public class Autoscale {
 	private void init() {
 		
 		executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(instance, 0, Config.intervall_timer, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(instance, 0, 1, TimeUnit.SECONDS);
 		
 		LOG.info("Initializing autoscaling complete");
 	}

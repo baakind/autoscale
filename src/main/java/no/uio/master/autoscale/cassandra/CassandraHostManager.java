@@ -1,5 +1,6 @@
 package no.uio.master.autoscale.cassandra;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -7,112 +8,144 @@ import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.JmxMonitor;
+import no.uio.master.autoscale.node.HostManager;
 
-public class CassandraHostManager {
+public class CassandraHostManager implements HostManager<CassandraHost> {
 
 	private Set<CassandraHost> inactiveNodes;
 	private Set<CassandraHost> activeNodes;
 	private HConnectionManager connectionManager;
 	private static CassandraClientMonitor monitor;
-	
+
 	public CassandraHostManager(HConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
+		inactiveNodes = new HashSet<CassandraHost>(0);
+		activeNodes = new HashSet<CassandraHost>(0);
+		updateActiveHosts();
 	}
-	/**
-	 * Initialize new Cassandra-host object in memory
-	 * @param host
-	 * @param port 
-	 * @return
-	 */
-	public CassandraHost initNewHost(String host, int port) {
-		CassandraHost node = new CassandraHost(host, port);
-		return node;
+
+	@Override
+	public CassandraHost initNewNode(String host, int port) {
+		return new CassandraHost(host, port);
 	}
-	
-	/**
-	 * Add a host to cluster. <br>
-	 * Removes host from inactiveHosts, and append to activeHosts
-	 * @param node
-	 * @return
-	 */
-	public boolean addHostToCluster(HConnectionManager connectionManager, CassandraHost node) {
+
+	@Override
+	public void updateActiveHosts() {
+		activeNodes = connectionManager.getHosts();
+	}
+
+	@Override
+	public boolean addNodeToCluster(CassandraHost node) {
 		boolean result = connectionManager.addCassandraHost(node);
-		
-		if(result) {
-			activeNodes = connectionManager.getHosts();
+
+		if (result) {
+			updateActiveHosts();
 			for (Iterator<CassandraHost> iterator = inactiveNodes.iterator(); iterator.hasNext();) {
 				CassandraHost host = iterator.next();
-				
-				// If ip and port are equal
-				if(node.equals(host)) {
+
+				// IP and PORT are equal
+				if (node.equals(host)) {
 					iterator.remove();
 					monitor.updateKnownHosts();
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
-	/**
-	 * Remove host from cluster.<br>
-	 * Remove host from activeHosts, and append to inactiveHosts
-	 * @param node
-	 * @return
-	 */
-	public boolean removeHostFromCluster(CassandraHost node) {
-		boolean result = connectionManager.removeCassandraHost(node);
-		
-		if(result) {
-			activeNodes = connectionManager.getHosts();
-			inactiveNodes.add(node);
+	@Override
+	public boolean removeNodeFromCluster(CassandraHost host) {
+		 boolean result = connectionManager.removeCassandraHost(host);
+
+		if (result) {
 			monitor.updateKnownHosts();
+			activeNodes = connectionManager.getHosts();
+			inactiveNodes.add(host);
 		}
-		
+
 		return result;
 	}
-	
+
+	@Override
 	public Set<CassandraHost> getInactiveNodes() {
 		return inactiveNodes;
 	}
 
+	@Override
 	public void setInactiveNodes(Set<CassandraHost> inactiveNodes) {
 		this.inactiveNodes = inactiveNodes;
 	}
 
+	@Override
+	public void addInactiveNode(CassandraHost inactiveNode) {
+		inactiveNodes.add(inactiveNode);
+	}
+
+	@Override
+	public void removeInactiveNode(CassandraHost inactiveNode) {
+		for (Iterator<CassandraHost> iterator = inactiveNodes.iterator(); iterator.hasNext();) {
+			CassandraHost node = iterator.next();
+			
+			if(node.equals(inactiveNode)) {
+				iterator.remove();
+			}
+		}
+	}
+
+	@Override
+	public int getNumberOfInactiveNodes() {
+		return inactiveNodes.size();
+	}
+
+	@Override
 	public Set<CassandraHost> getActiveNodes() {
 		return activeNodes;
 	}
 
+	@Override
 	public void setActiveNodes(Set<CassandraHost> activeNodes) {
 		this.activeNodes = activeNodes;
 	}
-	
-	
-	public int getNumberOfInactiveHosts() {
-		return inactiveNodes.size();
+
+	@Override
+	public void addActiveNode(CassandraHost activeNode) {
+		activeNodes.add(activeNode);
 	}
-	
-	public int getNumberOfActiveHosts() {
-		return activeNodes.size();
-	}
-	
-	
-	public CassandraHost getActiveHost(String host) {
+
+	@Override
+	public void removeActiveNode(CassandraHost activeNode) {
 		for (Iterator<CassandraHost> iterator = activeNodes.iterator(); iterator.hasNext();) {
 			CassandraHost node = iterator.next();
-			if(node.getHost().equals(host)) {
+			
+			if(node.equals(activeNode)) {
+				iterator.remove();
+			}
+		}
+	}
+
+	@Override
+	public int getNumberOfActiveNodes() {
+		return activeNodes.size();
+	}
+
+	@Override
+	public CassandraHost getInactiveNode(String host) {
+		for (Iterator<CassandraHost> iterator = inactiveNodes.iterator(); iterator.hasNext();) {
+			CassandraHost node = iterator.next();
+			if (node.getHost().equals(host)) {
 				return node;
 			}
 		}
 		return null;
 	}
-	
-	public CassandraHost getInactiveHost(String host) {
-		for (Iterator<CassandraHost> iterator = inactiveNodes.iterator(); iterator.hasNext();) {
+
+	@Override
+	public CassandraHost getActiveNode(String host) {
+		for (Iterator<CassandraHost> iterator = activeNodes.iterator(); iterator.hasNext();) {
 			CassandraHost node = iterator.next();
-			if(node.getHost().equals(host)) {
+			if (node.getHost().equals(host)) {
 				return node;
 			}
 		}

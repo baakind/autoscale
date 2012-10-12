@@ -4,7 +4,8 @@ import me.prettyprint.hector.api.Cluster;
 
 public class Config {
 	/* Configurations changed by constructor arguments */
-	public static Integer intervall_timer = 1; 
+	public static Integer intervall_timer_slave = 1;
+	public static Integer intervall_timer_scaler = 10;
 	public static Integer threshold_breach_limit = 10;
 	public static Integer min_number_of_nodes = 1;
 	public static Double min_memory_usage = 10.0;
