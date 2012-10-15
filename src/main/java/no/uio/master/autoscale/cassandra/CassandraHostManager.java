@@ -22,7 +22,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 		inactiveNodes = new HashSet<CassandraHost>(0);
 		activeNodes = new HashSet<CassandraHost>(0);
-		updateActiveHosts();
+		updateActiveNodes();
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	}
 
 	@Override
-	public void updateActiveHosts() {
+	public void updateActiveNodes() {
 		activeNodes = connectionManager.getHosts();
 	}
 
@@ -40,7 +40,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 		boolean result = connectionManager.addCassandraHost(node);
 
 		if (result) {
-			updateActiveHosts();
+			updateActiveNodes();
 			for (Iterator<CassandraHost> iterator = inactiveNodes.iterator(); iterator.hasNext();) {
 				CassandraHost host = iterator.next();
 

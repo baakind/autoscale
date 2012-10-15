@@ -52,7 +52,7 @@ public class Scaler implements Runnable {
 	private void performCalculation() {
 		Map<BreachType, Integer> messageCount = countMessages();
 		
-		//TODO: Implement calucaltion and scaling-functionality here!
+		//TODO: Implement calculation and scaling-functionality here!
 	}
 	
 	

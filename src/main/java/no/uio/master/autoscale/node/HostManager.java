@@ -29,7 +29,7 @@ public interface HostManager<H> {
 	 * the nodes are taken down / shutdown, and should be moved to the 
 	 * list of inactive nodes.
 	 */
-	public void updateActiveHosts();
+	public void updateActiveNodes();
 	
 	/**
 	 * Should perform actions upon adding the provided node to the cluster, 

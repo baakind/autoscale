@@ -1,5 +1,8 @@
 package no.uio.master.autoscale.service;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +17,7 @@ import no.uio.master.autoscale.slave.message.SlaveMessage;
 import no.uio.master.autoscale.slave.message.enumerator.SlaveMessageType;
 import no.uio.master.autoscale.slave.net.Communicator;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +34,9 @@ public class AutoscaleDaemon implements Runnable {
 	private static SlaveListener slaveListener;
 	private static Communicator communicator;
 	
+	private static int hostUpdater = 0;
+	private final int UPDATE_NODELIST_COUNTER = 5;
+	
 	/**
 	 * Initialize autoscaler
 	 * @param clusterName
@@ -43,7 +50,7 @@ public class AutoscaleDaemon implements Runnable {
 	private void init(Cluster c) {
 		connectionManager = c.getConnectionManager();
 		nodeManager = new CassandraHostManager(connectionManager);
-		initializeSlaves();
+		initializeSlaves(nodeManager.getActiveNodes());
 		slaveListener = new SlaveListener();
 		initializeScaler(slaveListener);
 	}
@@ -52,12 +59,41 @@ public class AutoscaleDaemon implements Runnable {
 	public void run() {
 			LOG.debug("Daemon running...");
 			slaveListener.listenForMessage();
+			
+			//TODO: Should be moved to another class.
+			// This daemon ony runs every time a message is received, which means 
+			// it will not detect new nodes at a set interval
+			checkForNewHosts();
+	}
+
+	private void checkForNewHosts() {
+		// Update hosts every n-th run
+		if(hostUpdater < UPDATE_NODELIST_COUNTER) {
+			hostUpdater++;
+		} else {
+			Set<CassandraHost> oldHosts = nodeManager.getActiveNodes();
+			nodeManager.updateActiveNodes();
+			Set<CassandraHost> newHosts = nodeManager.getActiveNodes();
+			
+			// Contains a list of newHosts which did not exists in the old-list
+			Collection<CassandraHost> initList = CollectionUtils.subtract(newHosts, oldHosts);
+			
+			// Initialize the new slaves
+			if(!initList.isEmpty()) {
+				Set<CassandraHost> initSet = new HashSet<CassandraHost>();
+				initSet.addAll(initList);
+				initializeSlaves(initSet);
+			}
+			
+			hostUpdater = 0;
+		}
 	}
 	
 	/**
 	 * Send initialization-message to all slaves.
+	 * @param nodes to initialize
 	 */
-	private void initializeSlaves() {
+	private void initializeSlaves(Set<CassandraHost> nodes) {
 		
 		// Construct slave-message
 		SlaveMessage slaveMsg = new SlaveMessage(SlaveMessageType.INITIALIZATION);
@@ -70,8 +106,8 @@ public class AutoscaleDaemon implements Runnable {
 		slaveMsg.put("storage_location", Config.storage_location);
 
 		
-		// Send message to all slaves
-		for(CassandraHost host : nodeManager.getActiveNodes()) {
+		// Send message to all slaves 
+		for(CassandraHost host : nodes) {
 			communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 			communicator.sendMessage(host.getHost(), slaveMsg);
 			communicator = null;
