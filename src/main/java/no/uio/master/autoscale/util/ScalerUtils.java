@@ -15,11 +15,14 @@ public class ScalerUtils {
 	
 	public ScalerUtils() {
 		priorities = new HashMap<BreachType, Integer>();
-		
-		priorities.put(BreachType.MAX_DISK_USAGE, 	4);
-		priorities.put(BreachType.MAX_MEMORY_USAGE, 3);
-		priorities.put(BreachType.MIN_DISK_USAGE, 	2);
-		priorities.put(BreachType.MIN_MEMORY_USAGE, 1);
+
+		// Positive integers = scale-up
+		priorities.put(BreachType.MAX_DISK_USAGE, 	2);
+		priorities.put(BreachType.MAX_MEMORY_USAGE, 1);
+
+		// Negative integers = scale-down
+		priorities.put(BreachType.MIN_MEMORY_USAGE, -1);
+		priorities.put(BreachType.MIN_DISK_USAGE, 	-2);
 		
 	}
 	/**
@@ -32,7 +35,8 @@ public class ScalerUtils {
 	}
 	
 	/**
-	 * Get priority of BreachType. If not found, return lowest priority (0).
+	 * Get priority of BreachType. If not found, return 0, which 
+	 * represent a stable node (either up or down)
 	 * @param type
 	 * @return
 	 */
