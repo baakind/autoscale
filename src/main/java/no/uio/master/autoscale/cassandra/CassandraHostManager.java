@@ -7,7 +7,9 @@ import java.util.Set;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.JmxMonitor;
+import me.prettyprint.cassandra.service.ThriftCluster;
 import no.uio.master.autoscale.node.HostManager;
 
 public class CassandraHostManager implements HostManager<CassandraHost> {
@@ -16,10 +18,14 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	private Set<CassandraHost> activeNodes;
 	private HConnectionManager connectionManager;
 	private static CassandraClientMonitor monitor;
+	private static CassandraHostConfigurator configurator;
 
 	public CassandraHostManager(HConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
+//		configurator = new CassandraHostConfigurator("127.0.0.1");//TODO: Hosts appended here?
+//		ThriftCluster thriftCluster = new ThriftCluster("KatanooCluster", configurator);
+		
 		inactiveNodes = new HashSet<CassandraHost>(0);
 		activeNodes = new HashSet<CassandraHost>(0);
 		updateActiveNodes();

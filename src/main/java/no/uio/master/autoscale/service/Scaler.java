@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import no.uio.master.autoscale.cassandra.CassandraHostManager;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.node.HostManager;
