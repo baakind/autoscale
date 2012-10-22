@@ -1,13 +1,16 @@
 package no.uio.master.autoscale.service;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
-import no.uio.master.autoscale.slave.message.BreachMessage;
-import no.uio.master.autoscale.slave.message.enumerator.BreachType;
+import me.prettyprint.cassandra.service.CassandraHost;
+import no.uio.master.autoscale.cassandra.CassandraHostManager;
+import no.uio.master.autoscale.message.BreachMessage;
+import no.uio.master.autoscale.node.HostManager;
+import no.uio.master.autoscale.util.HostWeight;
+import no.uio.master.autoscale.util.Scale;
 import no.uio.master.autoscale.util.ScalerUtils;
 
 import org.slf4j.Logger;
@@ -15,116 +18,154 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The actual scaler.<br>
- * It gathers all breach-messages from current batch, and 
- * determine if any nodes should be scaled up/down, whom etc
+ * It gathers all breach-messages from current batch, and determine if any nodes
+ * should be scaled up/down, whom etc
+ * 
  * @author andreas
  */
 public class Scaler implements Runnable {
 	private static Logger LOG = LoggerFactory.getLogger(Scaler.class);
-	private SlaveListener slaveListener;
+	private static SlaveListener slaveListener;
 	private static ScalerUtils scalerUtils = new ScalerUtils();
-	
-	private static Map<Date, BreachMessage<?>> breachMessages;
-	
-	public Scaler(SlaveListener listener) {
+	private static HostManager<?> nodeManager;
+
+	private static List<BreachMessage<?>> breachMessages;
+
+	public Scaler(SlaveListener listener, HostManager<?> hManager) {
 		LOG.debug("Initialize scaler");
 		slaveListener = listener;
+		nodeManager = (CassandraHostManager) hManager;
 	}
 
 	@Override
 	public void run() {
 		LOG.debug("Scaler running");
 		collectBreachMessages();
-		performCalculation();
+		performScaleCalculation();
 	}
-	
+
 	/**
 	 * Collect and empty breach-messages from slave-listener
 	 */
-	private void collectBreachMessages() {
+	protected void collectBreachMessages() {
 		breachMessages = slaveListener.getBatchedBreachMessages();
 		LOG.debug("Batch received, number of messages:" + breachMessages.size());
 		slaveListener.emptyBatchBreachMessageList();
 	}
 
 	/**
-	 * Perform calculation upon collected breach-messages, and eventually other conditions 
-	 * which may be of interest.
+	 * Perform calculation upon collected breach-messages, and eventually other
+	 * conditions which may be of interest.
 	 */
-	private void performCalculation() {
-		// Use this implementation?
-		//Map<String,Map<BreachType, Integer>> messageCountPerHost = countMessagesPerHost();
+	protected void performScaleCalculation() {
+		List<HostWeight> weightedResults = hostWeights();
+		List<HostWeight> scaleEntities = selectScaleEntities(weightedResults);
 		
-		//Use this scoring-implementation?
-		Map<String, Integer> scoredResults = performScoring();
-		//TODO: Implement calculation and scaling-functionality here!
+		// Perform scaling
+		for (HostWeight hostWeight : scaleEntities) {
+			if(hostWeight.getScale() != null) {
+				
+				if(hostWeight.getScale() == Scale.UP) {
+					LOG.info("Scaling up extra node. " + hostWeight.getHost() + " is overloaded!");
+					
+					if(!nodeManager.getInactiveNodes().isEmpty()) {
+						CassandraHost host = (CassandraHost) nodeManager.getInactiveNodes().iterator().next();
+						
+					} else {
+						LOG.info("No available nodes for scaling!");
+					}
+					
+				} else if(hostWeight.getScale() == Scale.DOWN) {
+					LOG.info("Scaling down node " + hostWeight.getHost());
+				}
+			}
+		}
+		
 	}
 	
+	protected static List<HostWeight> selectScaleEntities(List<HostWeight> weightedResults) {
+		List<HostWeight> scale = new ArrayList<HostWeight>();
+		
+		// Split results in scale up and scale down results
+		List<HostWeight> scaleUp = new ArrayList<HostWeight>();
+		List<HostWeight> scaleDown = new ArrayList<HostWeight>();
+		for (HostWeight host : weightedResults) {
+			if(host.getScore() > 0) {
+				host.setScale(Scale.UP);
+				scaleUp.add(host);
+			} else if(host.getScore() < 0) {
+				host.setScale(Scale.DOWN);
+				scaleDown.add(host);
+			}
+		}
+		
+		// Sort lists
+		sortHostWeights(scaleUp);
+		sortHostWeights(scaleDown);
+		
+		
+		Integer absScaleDownWeight = Math.abs(scaleDown.get(0).getScore());
+		Integer scaleUpWeight = scaleUp.get(scaleUp.size()-1).getScore();
+		
+		/*
+		 * Scale up if:  scaleUp > scaleDown, or scaleUp == scaleDown
+		 * Scale down if: scaleUp < scaleDown, or scaleUp == scaleDown
+		 */
+		if(scaleUpWeight >= absScaleDownWeight) {
+			scale.add(scaleUp.get(scaleUp.size()-1));
+		}
+		if(scaleUpWeight <= absScaleDownWeight) {
+			scale.add(scaleDown.get(0));
+		}
+		
+		return scale;
+	}
+
+	/**
+	 * Sort <tt>weights<tt> list based on the score.
+	 * @param weights
+	 */
+	protected static void sortHostWeights(List<HostWeight> weights) {
+		if(weights.isEmpty()) {
+			return;
+		}
+		
+		Collections.sort(weights);
+	}
+
 	/**
 	 * Perform weighting of the messages.<br>
 	 * Results in a map containing <tt>node</tt> and <tt>score</tt><br>
 	 * A positive score means the node needs to be scaled up.<br>
-	 * A negative score means the node needs ot be scaled down.<br>
+	 * A negative score means the node needs to be scaled down.<br>
+	 * 
 	 * @return
 	 */
-	private static Map<String, Integer> performScoring() {
-		Map<String, Integer> map = new HashMap<String, Integer>(0);
-		
+	protected List<HostWeight> hostWeights() {
+		List<HostWeight> weights = new ArrayList<HostWeight>();
+
 		// Iterate all breach-messages
-		for (Iterator<Entry<Date, BreachMessage<?>>> iterator = breachMessages.entrySet().iterator(); iterator.hasNext();) {
-			Entry<Date, BreachMessage<?>> entry = iterator.next();
-			Date reportedTimeDate = entry.getKey();
-			BreachMessage<?> message = entry.getValue();
-			String senderHost = message.getSenderHost();
-			
-			Integer value = scalerUtils.getPriorityOfBreachType(message.getType());
-			
+		Iterator<BreachMessage<?>> iterator = breachMessages.iterator();
+		while(iterator.hasNext()) {
+			BreachMessage<?> msg = iterator.next();
+			String senderHost = msg.getSenderHost();
+
+			Integer value = scalerUtils.getPriorityOfBreachType(msg.getType());
+			HostWeight host = new HostWeight(senderHost, value);
+
 			// Sender host doesn't exist, create
-			if(!map.containsKey(senderHost)) {
-				map.put(senderHost, value);
+			if (!weights.contains(host)) {
+				weights.add(host);
 			} else {
-				value += map.get(senderHost);
-				map.put(senderHost, value);
+				int idx = weights.indexOf(host);
+				host = weights.get(idx);
+				value += host.getScore();
+				host.setScore(value);
+				weights.set(idx, host);
 			}
 		}
-		
-		return map;
-	}
-	
-	/**
-	 * Count messages per host. Map structure:<br>
-	 * &nbsp; <tt>Host.BreachType.Count</tt><br>
-	 * <br>
-	 * Important: The reported time is a timestamp of when the message was recorded locally,
-	 * not when the message was sent from slave.
-	 * @return
-	 */
-	private static Map<String, Map<BreachType, Integer>> countMessagesPerHost() {
-		Map<String, Map<BreachType, Integer>> map = new HashMap<String, Map<BreachType, Integer>>();
-		
-		// Iterate all breach-messages
-		for (Iterator<Entry<Date, BreachMessage<?>>> iterator = breachMessages.entrySet().iterator(); iterator.hasNext();) {
-			Entry<Date, BreachMessage<?>> entry = iterator.next();
-			Date reportedTimeDate = entry.getKey();
-			BreachMessage<?> message = entry.getValue();
-			
-			// Create mapping for senderHost if it doesn't exist
-			String senderHost = message.getSenderHost();
-			if(!map.containsKey(senderHost)) {
-				map.put(senderHost, new HashMap<BreachType, Integer>());
-			}
-			
-			// Map contains record of current breach-message, increase counter
-			if(map.get(senderHost).containsKey(message.getType())) {
-				Integer value = map.get(senderHost).get(message.getType());
-				map.get(senderHost).put(message.getType(), ++value);
-			} else { // Map does not contain record of current breach-message, initiate
-				map.get(senderHost).put(message.getType(), 1);
-			}
-			
-		}
-		
-		return map;
+
+		return weights;
 	}
 
 }

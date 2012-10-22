@@ -3,7 +3,7 @@ package no.uio.master.autoscale.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.uio.master.autoscale.slave.message.enumerator.BreachType;
+import no.uio.master.autoscale.message.enumerator.BreachType;
 
 /**
  * Extended functionality for the Scaler-class.
