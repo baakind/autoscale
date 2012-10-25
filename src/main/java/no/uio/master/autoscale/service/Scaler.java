@@ -78,6 +78,7 @@ public class Scaler implements Runnable {
 					
 				} else if(hostWeight.getScale() == Scale.DOWN) {
 					LOG.info("Scaling down node " + hostWeight.getHost());
+					//TOOD: Make sure we dont go below Config.min_number_of_active_nodes!
 				}
 			}
 		}

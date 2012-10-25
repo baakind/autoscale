@@ -69,6 +69,16 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+  				<groupId>org.apache.maven.plugins</groupId>
+  				<artifactId>maven-surefire-plugin</artifactId>
+  				<configuration>
+    				<excludes>
+     					<exclude>${exclude.tests}</exclude>
+    				</excludes>
+ 				 </configuration>
+			</plugin>
 		
 			<!-- mvn exec:java -Dexec.mainClass="com.example.Main" -->
 			<plugin>
@@ -91,6 +101,7 @@
     	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     	<project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    	<exclude.tests>**/*INTTest.java</exclude.tests>
   	</properties>
   	
 </project>

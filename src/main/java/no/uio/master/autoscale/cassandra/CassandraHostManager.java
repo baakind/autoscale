@@ -12,19 +12,29 @@ import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import no.uio.master.autoscale.node.HostManager;
 
+import org.apache.cassandra.tools.NodeCmd;
+import org.apache.cassandra.tools.NodeProbe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CassandraHostManager implements HostManager<CassandraHost> {
+	private static Logger LOG = LoggerFactory.getLogger(CassandraHostManager.class);
 
 	private Set<CassandraHost> inactiveNodes;
 	private Set<CassandraHost> activeNodes;
 	private HConnectionManager connectionManager;
 	private static CassandraClientMonitor monitor;
 	private static CassandraHostConfigurator configurator;
+	
 
 	public CassandraHostManager(HConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
 //		configurator = new CassandraHostConfigurator("127.0.0.1");//TODO: Hosts appended here?
 //		ThriftCluster thriftCluster = new ThriftCluster("KatanooCluster", configurator);
+
+		
+		
 		
 		inactiveNodes = new HashSet<CassandraHost>(0);
 		activeNodes = new HashSet<CassandraHost>(0);

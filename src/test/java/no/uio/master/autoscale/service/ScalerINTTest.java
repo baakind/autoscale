@@ -18,7 +18,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ScalerTest {
+public class ScalerINTTest {
 
 	private static SlaveListener slaveListener;
 	private static Scaler scaler;
