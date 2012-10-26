@@ -10,12 +10,12 @@ import java.util.concurrent.TimeUnit;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
-import no.uio.master.autoscale.cassandra.CassandraHostManager;
 import no.uio.master.autoscale.config.Config;
+import no.uio.master.autoscale.host.CassandraHostManager;
+import no.uio.master.autoscale.host.HostManager;
 import no.uio.master.autoscale.message.SlaveMessage;
 import no.uio.master.autoscale.message.enumerator.SlaveMessageType;
 import no.uio.master.autoscale.net.Communicator;
-import no.uio.master.autoscale.node.HostManager;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -122,7 +122,7 @@ public class AutoscaleDaemon implements Runnable {
 	 * @param listener
 	 */
 	private void initializeScaler(SlaveListener listener) {
-		Scaler scaler = new Scaler(listener, nodeManager);
+		SimpleCassandraScaler scaler = new SimpleCassandraScaler(listener, nodeManager);
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(scaler, 0, Config.intervall_timer_scaler, TimeUnit.SECONDS);
 	}

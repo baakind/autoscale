@@ -1,4 +1,4 @@
-package no.uio.master.autoscale.cassandra;
+package no.uio.master.autoscale.token;
 
 import java.math.BigInteger;
 import java.util.Comparator;

@@ -1,4 +1,4 @@
-package no.uio.master.autoscale.node;
+package no.uio.master.autoscale.host;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.apache.cassandra.config.ConfigurationException;
  * @author andreas
  *
  */
-public interface HostCmd {
+public interface HostProbe {
 
 	/**
 	 * Connect to <tt>host:port</tt>.<br>
@@ -45,9 +45,10 @@ public interface HostCmd {
 	
 	/**
 	 * Prepare the node for going into inactive-mode.<br>
-	 * &nbsp; - E.g., shut down communication.
+	 * First decommission the node (move data somewhere else),
+	 * then shut down all communication.
 	 */
-	public void prepareInactive();
+	public void prepareInactive()  throws InterruptedException;
 	
 	/**
 	 * Prpeare the node for going into active-mode.<br>

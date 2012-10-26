@@ -1,15 +1,14 @@
-package no.uio.master.autoscale.cassandra;
+package no.uio.master.autoscale.token;
 
 import java.math.BigInteger;
 
-import org.mortbay.log.Log;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.uio.master.autoscale.node.TokenGenerator;
-
 /**
  * Generate a token that is absolute centered between a and b.
+ * 
  * @author andreas
  */
 public class AbsoluteCenterTokenGenerator implements TokenGenerator<BigInteger> {

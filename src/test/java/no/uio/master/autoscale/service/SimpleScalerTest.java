@@ -8,20 +8,20 @@ import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
-import no.uio.master.autoscale.cassandra.CassandraHostManager;
+import no.uio.master.autoscale.host.CassandraHostManager;
+import no.uio.master.autoscale.host.HostManager;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.BreachType;
-import no.uio.master.autoscale.node.HostManager;
 import no.uio.master.autoscale.util.HostWeight;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ScalerINTTest {
+public class SimpleScalerTest {
 
 	private static SlaveListener slaveListener;
-	private static Scaler scaler;
+	private static SimpleCassandraScaler scaler;
 	private static HConnectionManager connectionManager;
 	private static HostManager<CassandraHost> nodeManager;
 	private static Cluster c;
@@ -32,7 +32,7 @@ public class ScalerINTTest {
 		connectionManager = c.getConnectionManager();
 		nodeManager = new CassandraHostManager(connectionManager);
 		slaveListener = new SlaveListener();
-		scaler = new Scaler(slaveListener, nodeManager);
+		scaler = new SimpleCassandraScaler(slaveListener, nodeManager);
 		generateBreachMessages();
 		scaler.collectBreachMessages();
 	}
@@ -70,7 +70,7 @@ public class ScalerINTTest {
 		weights.add(new HostWeight("127.0.0.3", 0));
 		weights.add(new HostWeight("127.0.0.4", 25));
 
-		Scaler.sortHostWeights(weights);
+		scaler.sortHostWeights(weights);
 
 		// Ascending order: 127.0.0.1, 127.0.0.3, 127.0.0.4, 127.0.0.2
 
@@ -81,7 +81,7 @@ public class ScalerINTTest {
 
 		// - Retrieve list from scaler
 		weights = scaler.hostWeights();
-		Scaler.sortHostWeights(weights);
+		scaler.sortHostWeights(weights);
 
 		// Ascending order: 127.0.0.1, 127.0.0.3, 127.0.0.2
 		Assert.assertEquals("127.0.0.1", weights.get(0).getHost());
@@ -110,7 +110,7 @@ public class ScalerINTTest {
 		weights.add(new HostWeight("127.0.0.4", 25));
 		weights.add(new HostWeight("127.0.0.5", -2));
 
-		List<HostWeight> scale = Scaler.selectScaleEntities(weights);
+		List<HostWeight> scale = scaler.selectScaleEntities(weights);
 		Assert.assertEquals(2, scale.size());
 
 		boolean match = false;

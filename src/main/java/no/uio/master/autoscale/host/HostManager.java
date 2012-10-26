@@ -1,4 +1,4 @@
-package no.uio.master.autoscale.node;
+package no.uio.master.autoscale.host;
 
 import java.util.Set;
 

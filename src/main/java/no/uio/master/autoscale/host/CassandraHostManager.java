@@ -1,4 +1,4 @@
-package no.uio.master.autoscale.cassandra;
+package no.uio.master.autoscale.host;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,13 +7,8 @@ import java.util.Set;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.JmxMonitor;
-import me.prettyprint.cassandra.service.ThriftCluster;
-import no.uio.master.autoscale.node.HostManager;
 
-import org.apache.cassandra.tools.NodeCmd;
-import org.apache.cassandra.tools.NodeProbe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,18 +19,11 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	private Set<CassandraHost> activeNodes;
 	private HConnectionManager connectionManager;
 	private static CassandraClientMonitor monitor;
-	private static CassandraHostConfigurator configurator;
 	
 
 	public CassandraHostManager(HConnectionManager connectionManager) {
 		this.connectionManager = connectionManager;
 		monitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
-//		configurator = new CassandraHostConfigurator("127.0.0.1");//TODO: Hosts appended here?
-//		ThriftCluster thriftCluster = new ThriftCluster("KatanooCluster", configurator);
-
-		
-		
-		
 		inactiveNodes = new HashSet<CassandraHost>(0);
 		activeNodes = new HashSet<CassandraHost>(0);
 		updateActiveNodes();
@@ -63,7 +51,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 				// IP and PORT are equal
 				if (node.equals(host)) {
 					iterator.remove();
-					monitor.updateKnownHosts();
+					updateActiveNodes();
 				}
 			}
 		}
@@ -76,8 +64,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 		 boolean result = connectionManager.removeCassandraHost(host);
 
 		if (result) {
-			monitor.updateKnownHosts();
-			activeNodes = connectionManager.getHosts();
+			updateActiveNodes();
 			inactiveNodes.add(host);
 		}
 
@@ -143,6 +130,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 
 	@Override
 	public int getNumberOfActiveNodes() {
+		updateActiveNodes();
 		return activeNodes.size();
 	}
 

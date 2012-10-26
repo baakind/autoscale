@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
 
-import no.uio.master.autoscale.node.HostCmd;
+import no.uio.master.autoscale.host.CassandraProbe;
+import no.uio.master.autoscale.host.HostProbe;
 
 import org.apache.cassandra.config.ConfigurationException;
 import org.junit.AfterClass;
@@ -16,11 +17,11 @@ public class CassandraHostCmdINTTest {
 	private static final String HOST = "127.0.0.1";
 	private static final int PORT = 8001;
 	
-	private static HostCmd hostCmd;
+	private static HostProbe hostCmd;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		hostCmd = new CassandraHostCmd(HOST, PORT);
+		hostCmd = new CassandraProbe(HOST, PORT);
 	}
 
 	@AfterClass
@@ -55,7 +56,7 @@ public class CassandraHostCmdINTTest {
 	}
 
 	@Test
-	public void testPrepareInactive() {
+	public void testPrepareInactive() throws InterruptedException {
 		hostCmd.prepareInactive();
 	}
 
