@@ -33,6 +33,7 @@ public class AutoscaleDaemon implements Runnable {
 	
 	private static SlaveListener slaveListener;
 	private static Communicator communicator;
+	private static SimpleCassandraScaler scaler;
 	
 	private static int hostUpdater = 0;
 	private final int UPDATE_NODELIST_COUNTER = 5;
@@ -122,7 +123,7 @@ public class AutoscaleDaemon implements Runnable {
 	 * @param listener
 	 */
 	private void initializeScaler(SlaveListener listener) {
-		SimpleCassandraScaler scaler = new SimpleCassandraScaler(listener, nodeManager);
+		scaler = new SimpleCassandraScaler(listener, nodeManager);
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(scaler, 0, Config.intervall_timer_scaler, TimeUnit.SECONDS);
 	}

@@ -61,7 +61,12 @@ public class SimpleCassandraScaler implements Scaler {
 
 	@Override
 	public void performScaleCalculation() {
+		LOG.debug("Perform calculation...");
 		List<HostWeight> weightedResults = hostWeights();
+		if(weightedResults.isEmpty()) {
+			LOG.debug("No messages found.");
+			return;
+		}
 		List<HostWeight> scaleEntities = selectScaleEntities(weightedResults);
 
 		// Perform scaling
@@ -79,7 +84,8 @@ public class SimpleCassandraScaler implements Scaler {
 							probe.moveNode(newToken);
 						} catch (Exception e) {
 							LOG.error("Failed while moving node to new location. ",e);
-							break;
+							throw new RuntimeException("Failed while moving node to new location");
+							//break;
 						}
 						probe.prepareActive();
 						nodeManager.addNodeToCluster(host);
@@ -98,7 +104,8 @@ public class SimpleCassandraScaler implements Scaler {
 							probe.prepareInactive();
 						} catch (InterruptedException e) {
 							LOG.error("Failed while preparing node for going inactive");
-							break;
+							throw new RuntimeException("Failed while preparing node for going inactive");
+							//break;
 						}
 						nodeManager.removeNodeFromCluster(host);
 						probe = null;
@@ -128,25 +135,30 @@ public class SimpleCassandraScaler implements Scaler {
 				scaleDown.add(host);
 			}
 		}
-
+		
 		// Sort lists
 		sortHostWeights(scaleUp);
 		sortHostWeights(scaleDown);
 
-		Integer absScaleDownWeight = Math.abs(scaleDown.get(0).getScore());
-		Integer scaleUpWeight = scaleUp.get(scaleUp.size() - 1).getScore();
-
+		Integer scaleDownWeightAbs = 0;
+		if(!scaleDown.isEmpty()) {
+		scaleDownWeightAbs = scaleDown.get(0).getScore() == 0 ? scaleDown.get(0).getScore() : -scaleDown.get(0).getScore();
+		}
+		
+		Integer scaleUpWeight = 0;
+		if(!scaleUp.isEmpty()) {
+			scaleUpWeight = scaleUp.get(scaleUp.size() - 1).getScore();
+		}
 		/*
 		 * Scale up if: scaleUp > scaleDown, or scaleUp == scaleDown Scale down
 		 * if: scaleUp < scaleDown, or scaleUp == scaleDown
 		 */
-		if (scaleUpWeight >= absScaleDownWeight) {
+		if (scaleUpWeight >= scaleDownWeightAbs && !scaleUp.isEmpty()) {
 			scale.add(scaleUp.get(scaleUp.size() - 1));
 		}
-		if (scaleUpWeight <= absScaleDownWeight) {
+		if (scaleUpWeight <= scaleDownWeightAbs && !scaleDown.isEmpty()) {
 			scale.add(scaleDown.get(0));
 		}
-
 		return scale;
 	}
 
