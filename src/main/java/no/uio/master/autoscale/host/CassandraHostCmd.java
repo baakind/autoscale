@@ -9,16 +9,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import no.uio.master.autoscale.service.HostCmd;
 import no.uio.master.autoscale.token.AbsoluteCenterTokenGenerator;
 import no.uio.master.autoscale.token.BigIntegerTokenComparator;
 
 import org.apache.cassandra.config.ConfigurationException;
-import org.apache.cassandra.tools.NodeCmd;
 import org.apache.cassandra.tools.NodeProbe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraProbe implements HostProbe {
+/**
+ * @author andreas
+ *
+ */
+public class CassandraHostCmd implements HostCmd {
 	private static Logger LOG = LoggerFactory.getLogger(CassandraHostManager.class);
 
 	private static NodeProbe nodeProbe;
@@ -26,72 +30,77 @@ public class CassandraProbe implements HostProbe {
 	private String host;
 	private int port;
 	
-	public CassandraProbe(String host, int port) {
+	public CassandraHostCmd(String host, int port) {
 		this.host = host;
 		this.port = port;
 		
-		connect(host, port);
+		try {
+			nodeProbe = new NodeProbe(host, port);
+			LOG.debug("Initialized Cassandra HostCommand: "+host+":"+port);
+		} catch (Exception e) {
+			LOG.error("Failed to initialise Cassandra HostCommand: " + host +":"+port);
+		}
 		
 	}
 	
 	@Override
-	public void connect(String host, int port) {
+	public void disconnect() {
 		try {
-			nodeProbe = new NodeProbe(host, port);
-		} catch (Exception e) {
-			LOG.error("Failed to initialise nodeProbe - " + host +":"+port);
+			nodeProbe.close();
+		} catch (IOException e) {
+			LOG.error("Failed while closing connection to Cassandra HostCommand: " + host);
 		}
 	}
 	
 	@Override
 	public String getToken() {
-		return nodeProbe.getToken();
-	}
-
-	@Override
-	public void moveNode(String newToken) throws IOException, InterruptedException, ConfigurationException {
-		LOG.debug("Move "+host+" from token: " + nodeProbe.getToken() + " -> " + newToken);
-		nodeProbe.move(newToken);
-		//TODO: Should run cleanup
+		String token = nodeProbe.getToken();
+		LOG.debug("Retrieve token: " + token);
+		return token;
 	}
 
 	@Override
 	public long getUptime() {
-		return nodeProbe.getUptime();
+		long uptime = nodeProbe.getUptime();
+		LOG.debug("Uptime: "+uptime+"ms");
+		return uptime;
 	}
 
 	@Override
-	public void prepareInactive() throws InterruptedException {
-		LOG.debug("Shutting down gossip and thrift-server.");
-		nodeProbe.decommission();
+	public void removeHostFromCluster() throws InterruptedException {
+		LOG.debug("Removing host from cluster - " + host);
+		//nodeProbe.decommission();
 		nodeProbe.stopGossiping();
 		nodeProbe.stopThriftServer();
 	}
-
+	
 	@Override
-	public void prepareActive() {
-		LOG.debug("Starting gossip and thrift-server.");
-		nodeProbe.startThriftServer();
-		nodeProbe.startGossiping();
+	public void addHostToCluster(String newToken) throws IOException, InterruptedException {
+		LOG.debug("Adding host to cluster - " + host);
+		try {
+			//TODO: Remove old token from cluster from another node
+			//nodeProbe.rebuild(nodeProbe.getDataCenter());
+			//nodeProbe.joinRing();
+			nodeProbe.move(newToken);
+			//TODO: Run cleanup here - probably removeToken does the trick
+			nodeProbe.startGossiping();
+			nodeProbe.startThriftServer();
+			nodeProbe.resetLocalSchema();
+		} catch (ConfigurationException e) {
+			LOG.error("Failed while moving node to new location");
+		}
 	}
 
-	
-	
 	@Override
 	public String generateNewToken() {
 		String thisToken = getToken();
 		String previousToken = getPreviousToken(thisToken);
 		BigInteger newToken = new AbsoluteCenterTokenGenerator().generateToken(new BigInteger(previousToken), new BigInteger(thisToken));
+		LOG.debug("New token generated for host ["+host+"]: " + thisToken + " -> " + newToken.toString());
 		return newToken.toString();
 	}
 
-	@Override
-	public List<Entry<String, String>> getRingTokensSorted() {
-		return sortMap(nodeProbe.getTokenToEndpointMap());
-	}
-	
-	@Override
-	public String getPreviousToken(String thisToken) {
+	private String getPreviousToken(String thisToken) {
 		String previousToken = "";
 		List<Entry<String, String>> sortedMap = getRingTokensSorted();
 		int number = 1;
@@ -118,6 +127,9 @@ public class CassandraProbe implements HostProbe {
 		return previousToken;
 	}
 	
+	private List<Entry<String, String>> getRingTokensSorted() {
+		return sortMap(nodeProbe.getTokenToEndpointMap());
+	}
 	/**
 	 * Sort <tt>map</tt>.
 	 * @param map
@@ -132,5 +144,11 @@ public class CassandraProbe implements HostProbe {
 		
 		Collections.sort(list, new BigIntegerTokenComparator());
 		return list;
+	}
+
+	@Override
+	public void removeToken(String token) {
+		LOG.debug("Remove token: " + token);
+		nodeProbe.removeToken(token);
 	}
 }

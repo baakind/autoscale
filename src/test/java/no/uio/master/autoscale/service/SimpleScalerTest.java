@@ -9,7 +9,6 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
 import no.uio.master.autoscale.host.CassandraHostManager;
-import no.uio.master.autoscale.host.HostManager;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.BreachType;
 import no.uio.master.autoscale.util.HostWeight;
@@ -23,7 +22,7 @@ public class SimpleScalerTest {
 	private static SlaveListener slaveListener;
 	private static SimpleCassandraScaler scaler;
 	private static HConnectionManager connectionManager;
-	private static HostManager<CassandraHost> nodeManager;
+	private static CassandraHostManager nodeManager;
 	private static Cluster c;
 
 	@BeforeClass

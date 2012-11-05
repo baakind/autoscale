@@ -46,7 +46,6 @@ public class Autoscale {
 		Config.storage_location = storageLocation;
 		Config.cluster = c;
 		
-		instance = new AutoscaleDaemon(c);
 		init();
 	}
 	

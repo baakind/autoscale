@@ -9,9 +9,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 import no.uio.master.autoscale.config.Config;
-import no.uio.master.autoscale.host.CassandraProbe;
-import no.uio.master.autoscale.host.HostManager;
-import no.uio.master.autoscale.host.HostProbe;
+import no.uio.master.autoscale.host.CassandraHostManager;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.BreachType;
 import no.uio.master.autoscale.util.HostWeight;
@@ -23,26 +21,25 @@ import org.slf4j.LoggerFactory;
 public class SimpleCassandraScaler implements Scaler {
 	private static Logger LOG = LoggerFactory.getLogger(SimpleCassandraScaler.class);
 	private static SlaveListener slaveListener;
-	private static HostManager<CassandraHost> nodeManager;
+	private static CassandraHostManager hostManager;
 
 	private static List<BreachMessage<?>> breachMessages;
 	private static Map<BreachType, Integer> priorities = new HashMap<BreachType, Integer>();
-	
+
 	static {
 		// Positive integers = scale-up
-		priorities.put(BreachType.MAX_DISK_USAGE, 	2);
+		priorities.put(BreachType.MAX_DISK_USAGE, 2);
 		priorities.put(BreachType.MAX_MEMORY_USAGE, 1);
 
 		// Negative integers = scale-down
 		priorities.put(BreachType.MIN_MEMORY_USAGE, -1);
-		priorities.put(BreachType.MIN_DISK_USAGE, 	-2);
+		priorities.put(BreachType.MIN_DISK_USAGE, -2);
 	}
-	
 
-	public SimpleCassandraScaler(SlaveListener listener, HostManager<CassandraHost> hManager) {
+	public SimpleCassandraScaler(SlaveListener listener, CassandraHostManager hManager) {
 		LOG.debug("Initialize scaler");
 		slaveListener = listener;
-		nodeManager = hManager;
+		hostManager = hManager;
 	}
 
 	@Override
@@ -63,7 +60,7 @@ public class SimpleCassandraScaler implements Scaler {
 	public void performScaleCalculation() {
 		LOG.debug("Perform calculation...");
 		List<HostWeight> weightedResults = hostWeights();
-		if(weightedResults.isEmpty()) {
+		if (weightedResults.isEmpty()) {
 			LOG.debug("No messages found.");
 			return;
 		}
@@ -75,41 +72,19 @@ public class SimpleCassandraScaler implements Scaler {
 
 				if (hostWeight.getScale() == Scale.UP) {
 
-					if (!nodeManager.getInactiveNodes().isEmpty()) {
+					if (!hostManager.getInactiveHosts().isEmpty()) {
 						LOG.info("Scaling up extra node. " + hostWeight.getHost() + " is overloaded!");
-						CassandraHost host = nodeManager.getInactiveNodes().iterator().next();
-						HostProbe probe = new CassandraProbe(host.getHost(), host.getPort());
-						String newToken = probe.generateNewToken();
-						try {
-							probe.moveNode(newToken);
-						} catch (Exception e) {
-							LOG.error("Failed while moving node to new location. ",e);
-							throw new RuntimeException("Failed while moving node to new location");
-							//break;
-						}
-						probe.prepareActive();
-						nodeManager.addNodeToCluster(host);
-						probe = null;
-						LOG.info("Scaling up complete");
+						CassandraHost host = hostManager.getInactiveHosts().iterator().next();
+						hostManager.addHostToCluster(host);
 					} else {
 						LOG.info("No available nodes for scaling!");
 					}
 
 				} else if (hostWeight.getScale() == Scale.DOWN) {
-					if (nodeManager.getNumberOfActiveNodes() > Config.min_number_of_nodes) {
+					if (hostManager.getActiveHosts().size() > Config.min_number_of_nodes) {
 						LOG.info("Scaling down node " + hostWeight.getHost());
-						CassandraHost host = nodeManager.getActiveNode(hostWeight.getHost());
-						HostProbe probe = new CassandraProbe(host.getHost(), host.getPort());
-						try {
-							probe.prepareInactive();
-						} catch (InterruptedException e) {
-							LOG.error("Failed while preparing node for going inactive");
-							throw new RuntimeException("Failed while preparing node for going inactive");
-							//break;
-						}
-						nodeManager.removeNodeFromCluster(host);
-						probe = null;
-						LOG.info("Scaling down complete");
+						CassandraHost host = hostManager.getActiveHost(hostWeight.getHost());
+						hostManager.removeHostFromCluster(host);
 					} else {
 						LOG.info("Already scaled down to minimum number of nodes, scaling aborted!");
 					}
@@ -135,18 +110,19 @@ public class SimpleCassandraScaler implements Scaler {
 				scaleDown.add(host);
 			}
 		}
-		
+
 		// Sort lists
 		sortHostWeights(scaleUp);
 		sortHostWeights(scaleDown);
 
 		Integer scaleDownWeightAbs = 0;
-		if(!scaleDown.isEmpty()) {
-		scaleDownWeightAbs = scaleDown.get(0).getScore() == 0 ? scaleDown.get(0).getScore() : -scaleDown.get(0).getScore();
+		if (!scaleDown.isEmpty()) {
+			scaleDownWeightAbs = scaleDown.get(0).getScore() == 0 ? scaleDown.get(0).getScore() : -scaleDown.get(0)
+					.getScore();
 		}
-		
+
 		Integer scaleUpWeight = 0;
-		if(!scaleUp.isEmpty()) {
+		if (!scaleUp.isEmpty()) {
 			scaleUpWeight = scaleUp.get(scaleUp.size() - 1).getScore();
 		}
 		/*
@@ -198,20 +174,21 @@ public class SimpleCassandraScaler implements Scaler {
 
 		return weights;
 	}
-	
+
 	/**
-	 * Get priority of BreachType. If not found, return 0, which 
-	 * represent a stable node (either up or down)
+	 * Get priority of BreachType. If not found, return 0, which represent a
+	 * stable node (either up or down)
+	 * 
 	 * @param type
 	 * @return
 	 */
 	private Integer getPriorityOfBreachType(BreachType type) {
 		Integer pri = 0;
-		
-		if(priorities.containsKey(type)) {
+
+		if (priorities.containsKey(type)) {
 			pri = priorities.get(type);
 		}
-		
+
 		return pri;
 	}
 
