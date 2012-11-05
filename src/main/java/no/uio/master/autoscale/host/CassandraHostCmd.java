@@ -2,6 +2,7 @@ package no.uio.master.autoscale.host;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -13,8 +14,14 @@ import no.uio.master.autoscale.service.HostCmd;
 import no.uio.master.autoscale.token.AbsoluteCenterTokenGenerator;
 import no.uio.master.autoscale.token.BigIntegerTokenComparator;
 
+import org.apache.cassandra.concurrent.JMXEnabledThreadPoolExecutor;
+import org.apache.cassandra.concurrent.JMXEnabledThreadPoolExecutorMBean;
 import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.net.MessagingService;
+import org.apache.cassandra.tools.NodeCmd;
 import org.apache.cassandra.tools.NodeProbe;
+import org.apache.cassandra.utils.FBUtilities;
+import org.codehaus.jackson.map.ser.std.InetAddressSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +41,17 @@ public class CassandraHostCmd implements HostCmd {
 		this.host = host;
 		this.port = port;
 		
+		connect(host, port);
+		
+	}
+	
+	private void connect(String host, int port) {
 		try {
 			nodeProbe = new NodeProbe(host, port);
 			LOG.debug("Initialized Cassandra HostCommand: "+host+":"+port);
 		} catch (Exception e) {
 			LOG.error("Failed to initialise Cassandra HostCommand: " + host +":"+port);
 		}
-		
 	}
 	
 	@Override
@@ -68,24 +79,47 @@ public class CassandraHostCmd implements HostCmd {
 
 	@Override
 	public void removeHostFromCluster() throws InterruptedException {
-		LOG.debug("Removing host from cluster - " + host);
-		//nodeProbe.decommission();
+		LOG.debug("Removing host from cluster - " + host+"...");
+		nodeProbe.decommission();
 		nodeProbe.stopGossiping();
-		nodeProbe.stopThriftServer();
+		//nodeProbe.stopThriftServer();
+		//TODO: Wipe data from disk-location to make the node a fresh node
+		//TODO: Keep threadPool, or somehow keep reference or how to re-gain.
+		LOG.debug("Finnished removing host from cluster");
 	}
 	
 	@Override
 	public void addHostToCluster(String newToken) throws IOException, InterruptedException {
-		LOG.debug("Adding host to cluster - " + host);
 		try {
+			//TODO: Howto enable threadPool again
+			//TODO: Start MessagingService here somehow!
+			//InetAddress adr = InetAddress.getByAddress(new byte[]{127,0,0,2});
+			//MessagingService.instance().listen(adr);
+			
+			LOG.debug("Adding host to cluster - " + host+"...");
+			
 			//TODO: Remove old token from cluster from another node
-			//nodeProbe.rebuild(nodeProbe.getDataCenter());
-			//nodeProbe.joinRing();
+			if(!nodeProbe.isJoined()) {
+				LOG.debug("Join ring");
+				nodeProbe.joinRing();
+			}
+			
+			if(!nodeProbe.isThriftServerRunning()) {
+				LOG.debug("Starting thrift-client");
+				nodeProbe.startThriftServer();
+			}
+			
+			if(!nodeProbe.isInitialized()) {
+				LOG.debug("Starting gossip-protocol");
+				nodeProbe.startGossiping();
+			}
+
+			nodeProbe.rebuild(null);//nodeProbe.getDataCenter());
+			//nodeProbe.resetLocalSchema();
+
 			nodeProbe.move(newToken);
-			//TODO: Run cleanup here - probably removeToken does the trick
-			nodeProbe.startGossiping();
-			nodeProbe.startThriftServer();
-			nodeProbe.resetLocalSchema();
+
+			LOG.debug("Finnished adding host to cluster");
 		} catch (ConfigurationException e) {
 			LOG.error("Failed while moving node to new location");
 		}
@@ -93,7 +127,7 @@ public class CassandraHostCmd implements HostCmd {
 
 	@Override
 	public String generateNewToken() {
-		String thisToken = getToken();
+		String thisToken = nodeProbe.getToken();
 		String previousToken = getPreviousToken(thisToken);
 		BigInteger newToken = new AbsoluteCenterTokenGenerator().generateToken(new BigInteger(previousToken), new BigInteger(thisToken));
 		LOG.debug("New token generated for host ["+host+"]: " + thisToken + " -> " + newToken.toString());

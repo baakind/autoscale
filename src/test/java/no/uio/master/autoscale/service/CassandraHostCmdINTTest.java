@@ -19,9 +19,9 @@ import org.junit.Test;
  *
  */
 public class CassandraHostCmdINTTest {
-	private static final String HOST = "127.0.0.1";
-	private static final int PORT = 8001;
-	private static final String OTHER_HOST = "127.0.0.1";
+	private static final String HOST = "127.0.0.2";
+	private static final int PORT = 8002;
+	private static final String OTHER_HOST = "127.0.0.3";
 	private static final int OTHER_PORT = 8003;
 	
 	private static HostCmd hostCmd;
@@ -65,14 +65,18 @@ public class CassandraHostCmdINTTest {
 	@Test
 	public void testAddHostToCluster() throws IOException, InterruptedException {
 		// Retrieve previous token, as it has to be removed from another host
-		String previousToken = hostCmd.getToken();
 		hostCmd.addHostToCluster(hostCmd.generateNewToken());
 		
-		// Remove previous token of node from another node
-//		otherHostCmd = new CassandraHostCmd(OTHER_HOST, OTHER_PORT);
-//		otherHostCmd.removeToken(previousToken);
-//		otherHostCmd.disconnect();
-//		otherHostCmd = null;
+		//TODO:
+		/*
+		 * Kanskje beste l¿sning rett og slett er Œ ha to Shell-scripts:
+		 * 1. Shutdown cassandra-node
+		 * 		- 1. Kj¿rer "CTRL+C" / end-process
+		 * 2. Startup cassandra node <newToken>
+		 * 		- 1. Flusher data-directory
+		 * 		- 2. Oppdaterer cassandra.yaml med newToken (fil)
+		 * 		- 3. kj¿rer: bin/cassandra -f (Kan lese argument fra config-fil)
+		 */
 	}
 
 
