@@ -1,7 +1,5 @@
 package no.uio.master.autoscale.service;
 
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 
 import no.uio.master.autoscale.host.CassandraHostCmd;
@@ -59,24 +57,14 @@ public class CassandraHostCmdINTTest {
 
 	@Test
 	public void testRemoveHostFromCluster() throws InterruptedException {
-		hostCmd.removeHostFromCluster();
+		//hostCmd.removeHostFromCluster();
 	}
 
 	@Test
 	public void testAddHostToCluster() throws IOException, InterruptedException {
 		// Retrieve previous token, as it has to be removed from another host
-		hostCmd.addHostToCluster(hostCmd.generateNewToken());
+		//hostCmd.addHostToCluster(hostCmd.generateNewToken());
 		
-		//TODO:
-		/*
-		 * Kanskje beste l¿sning rett og slett er Œ ha to Shell-scripts:
-		 * 1. Shutdown cassandra-node
-		 * 		- 1. Kj¿rer "CTRL+C" / end-process
-		 * 2. Startup cassandra node <newToken>
-		 * 		- 1. Flusher data-directory
-		 * 		- 2. Oppdaterer cassandra.yaml med newToken (fil)
-		 * 		- 3. kj¿rer: bin/cassandra -f (Kan lese argument fra config-fil)
-		 */
 	}
 
 

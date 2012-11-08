@@ -26,7 +26,6 @@ public class Autoscale {
 	 */
 	public Autoscale(Cluster c) {
 		LOG.info("Initializing autoscaling with default properties...");
-		instance = new AutoscaleDaemon(c);
 		Config.cluster = c;
 		init();
 	}
@@ -50,6 +49,7 @@ public class Autoscale {
 	}
 	
 	private void init() {
+		instance = new AutoscaleDaemon(Config.cluster);
 		executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(instance, 0, 1, TimeUnit.SECONDS);
 		
