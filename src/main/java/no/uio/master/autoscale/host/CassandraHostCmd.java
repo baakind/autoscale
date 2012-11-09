@@ -14,14 +14,9 @@ import no.uio.master.autoscale.service.HostCmd;
 import no.uio.master.autoscale.token.AbsoluteCenterTokenGenerator;
 import no.uio.master.autoscale.token.BigIntegerTokenComparator;
 
-import org.apache.cassandra.concurrent.JMXEnabledThreadPoolExecutor;
-import org.apache.cassandra.concurrent.JMXEnabledThreadPoolExecutorMBean;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.net.MessagingService;
-import org.apache.cassandra.tools.NodeCmd;
 import org.apache.cassandra.tools.NodeProbe;
-import org.apache.cassandra.utils.FBUtilities;
-import org.codehaus.jackson.map.ser.std.InetAddressSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +27,11 @@ import org.slf4j.LoggerFactory;
 public class CassandraHostCmd implements HostCmd {
 	private static Logger LOG = LoggerFactory.getLogger(CassandraHostManager.class);
 
-	private static NodeProbe nodeProbe;
+	private NodeProbe nodeProbe;
 	
 	private String host;
 	private int port;
+	
 	
 	public CassandraHostCmd(String host, int port) {
 		this.host = host;
@@ -79,7 +75,7 @@ public class CassandraHostCmd implements HostCmd {
 
 	@Override
 	public void removeHostFromCluster() throws InterruptedException {
-		LOG.debug("Removing host from cluster - " + host+"...");
+		LOG.debug("Removing host from cluster - {}...",host);
 		nodeProbe.decommission();
 		nodeProbe.stopGossiping();
 		//nodeProbe.stopThriftServer();
@@ -95,10 +91,10 @@ public class CassandraHostCmd implements HostCmd {
 			//TODO: Start MessagingService here somehow!
 			//InetAddress adr = InetAddress.getByAddress(new byte[]{127,0,0,2});
 			//MessagingService.instance().listen(adr);
+			//TODO: Restart MessagingService somehow
 			
-			LOG.debug("Adding host to cluster - " + host+"...");
+			LOG.debug("Adding host to cluster - {}...",host);
 			
-			//TODO: Remove old token from cluster from another node
 			if(!nodeProbe.isJoined()) {
 				LOG.debug("Join ring");
 				nodeProbe.joinRing();
@@ -116,7 +112,7 @@ public class CassandraHostCmd implements HostCmd {
 
 			nodeProbe.rebuild(null);//nodeProbe.getDataCenter());
 			//nodeProbe.resetLocalSchema();
-
+			
 			nodeProbe.move(newToken);
 
 			LOG.debug("Finnished adding host to cluster");

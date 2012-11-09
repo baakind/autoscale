@@ -19,11 +19,8 @@ import org.junit.Test;
 public class CassandraHostCmdINTTest {
 	private static final String HOST = "127.0.0.2";
 	private static final int PORT = 8002;
-	private static final String OTHER_HOST = "127.0.0.3";
-	private static final int OTHER_PORT = 8003;
 	
 	private static HostCmd hostCmd;
-	private static HostCmd otherHostCmd;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -57,16 +54,14 @@ public class CassandraHostCmdINTTest {
 
 	@Test
 	public void testRemoveHostFromCluster() throws InterruptedException {
-		//hostCmd.removeHostFromCluster();
+		hostCmd.removeHostFromCluster();
 	}
 
 	@Test
 	public void testAddHostToCluster() throws IOException, InterruptedException {
-		// Retrieve previous token, as it has to be removed from another host
-		//hostCmd.addHostToCluster(hostCmd.generateNewToken());
+		hostCmd.addHostToCluster(hostCmd.generateNewToken());
 		
 	}
-
 
 	@Test
 	public void testDisconnect() {
