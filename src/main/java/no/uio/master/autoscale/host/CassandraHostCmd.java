@@ -127,7 +127,7 @@ public class CassandraHostCmd implements HostCmd {
 		String previousToken = getPreviousToken(thisToken);
 		BigInteger newToken = new AbsoluteCenterTokenGenerator().generateToken(new BigInteger(previousToken), new BigInteger(thisToken));
 		LOG.debug("New token generated for host ["+host+"]: " + thisToken + " -> " + newToken.toString());
-		return newToken.toString();
+ 		return newToken.toString();
 	}
 
 	private String getPreviousToken(String thisToken) {

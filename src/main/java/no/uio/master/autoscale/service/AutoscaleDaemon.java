@@ -10,8 +10,8 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
 import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.host.CassandraHostManager;
-import no.uio.master.autoscale.message.SlaveMessage;
-import no.uio.master.autoscale.message.enumerator.SlaveMessageType;
+import no.uio.master.autoscale.message.AgentMessage;
+import no.uio.master.autoscale.message.enumerator.AgentMessageType;
 import no.uio.master.autoscale.net.Communicator;
 
 import org.slf4j.Logger;
@@ -95,7 +95,7 @@ public class AutoscaleDaemon implements Runnable {
 	private void initializeSlaves(Set<CassandraHost> nodes) {
 
 		// Construct slave-message
-		SlaveMessage slaveMsg = new SlaveMessage(SlaveMessageType.INITIALIZATION);
+		AgentMessage slaveMsg = new AgentMessage(AgentMessageType.STARTUP_NODE);
 		slaveMsg.put("intervall_timer", Config.intervall_timer_slave);
 		slaveMsg.put("threshold_breach_limit", Config.threshold_breach_limit);
 		slaveMsg.put("min_memory_usage", Config.min_memory_usage);
