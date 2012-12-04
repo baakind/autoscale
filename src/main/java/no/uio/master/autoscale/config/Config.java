@@ -1,10 +1,13 @@
 package no.uio.master.autoscale.config;
 
-import me.prettyprint.hector.api.Cluster;
+import java.util.HashSet;
+import java.util.Set;
+
+import no.uio.master.autoscale.host.CassandraHost;
 
 public class Config {
 	/* Configurations changed by constructor arguments */
-	public static Integer intervall_timer_slave = 1;
+	public static Integer intervall_timer_agent = 1;
 	public static Integer intervall_timer_scaler = 10;
 	public static Integer threshold_breach_limit = 10;
 	public static Integer min_number_of_nodes = 1;
@@ -13,9 +16,36 @@ public class Config {
 	public static Long min_free_disk_space = 60L;
 	public static Long max_free_disk_space = 20000L;
 	public static String storage_location = "/";
-	public static Cluster cluster = null;
 	
 	/* Comunication-ports */
 	public static Integer master_input_port = 7798;
 	public static Integer master_output_port = 7799;
+	
+	/* Runtime configurations */
+	private static volatile Set<CassandraHost> activeHosts = new HashSet<CassandraHost>(0);
+	private static volatile Set<CassandraHost> inactiveHosts = new HashSet<CassandraHost>(0);
+	
+	public static void setActiveHosts(Set<CassandraHost> activeHosts) {
+		synchronized (activeHosts) {
+			Config.activeHosts = activeHosts;
+		}
+	}
+	
+	public static Set<CassandraHost> getActiveHosts() {
+		synchronized(activeHosts) {
+			return Config.activeHosts;
+		}
+	}
+	
+	public static void setInactiveHosts(Set<CassandraHost> inactiveHosts) {
+		synchronized (Config.class) {
+			Config.inactiveHosts = inactiveHosts;
+		}
+	}
+	
+	public static Set<CassandraHost> getInactiveHosts() {
+		synchronized(Config.class) {
+			return Config.inactiveHosts;
+		}
+	}
 }

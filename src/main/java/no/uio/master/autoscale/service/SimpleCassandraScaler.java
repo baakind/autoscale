@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.CassandraHost;
 import no.uio.master.autoscale.config.Config;
+import no.uio.master.autoscale.host.CassandraHost;
 import no.uio.master.autoscale.host.CassandraHostManager;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.BreachType;
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class SimpleCassandraScaler implements Scaler {
 	private static Logger LOG = LoggerFactory.getLogger(SimpleCassandraScaler.class);
-	private static SlaveListener slaveListener;
+	private static AgentListener slaveListener;
 	private static CassandraHostManager hostManager;
 
 	private static List<BreachMessage<?>> breachMessages;
@@ -36,7 +36,7 @@ public class SimpleCassandraScaler implements Scaler {
 		priorities.put(BreachType.MIN_DISK_USAGE, -2);
 	}
 
-	public SimpleCassandraScaler(SlaveListener listener, CassandraHostManager hManager) {
+	public SimpleCassandraScaler(AgentListener listener, CassandraHostManager hManager) {
 		LOG.debug("Initialize scaler");
 		slaveListener = listener;
 		hostManager = hManager;

@@ -5,10 +5,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import me.prettyprint.cassandra.connection.HConnectionManager;
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.hector.api.Cluster;
 import no.uio.master.autoscale.config.Config;
+import no.uio.master.autoscale.host.CassandraHost;
 import no.uio.master.autoscale.host.CassandraHostManager;
 import no.uio.master.autoscale.message.AgentMessage;
 import no.uio.master.autoscale.message.enumerator.AgentMessageType;
@@ -25,11 +23,10 @@ import org.slf4j.LoggerFactory;
  */
 public class AutoscaleDaemon implements Runnable {
 	private static Logger LOG = LoggerFactory.getLogger(AutoscaleDaemon.class);
-	private static HConnectionManager connectionManager;
 	private static CassandraHostManager hostManager;
-	private static Set<CassandraHost> slaves;
+	private static Set<CassandraHost> agents;
 
-	private static SlaveListener slaveListener;
+	private static AgentListener agentListener;
 	private static Communicator communicator;
 	private static SimpleCassandraScaler scaler;
 
@@ -42,72 +39,65 @@ public class AutoscaleDaemon implements Runnable {
 	 * @param clusterName
 	 * @param host
 	 */
-	public AutoscaleDaemon(Cluster c) {
-		init(c);
+	public AutoscaleDaemon() {
+		init();
 		LOG.debug("Daemon started");
 	}
 
-	private void init(Cluster c) {
-		connectionManager = c.getConnectionManager();
-		hostManager = new CassandraHostManager(connectionManager);
+	private void init() {
+		hostManager = new CassandraHostManager();
 		initializeSlaves(hostManager.getActiveHosts());
-		slaveListener = new SlaveListener();
-		initializeScaler(slaveListener);
+		agentListener = new AgentListener();
+		initializeScaler(agentListener);
 	}
 
 	@Override
 	public void run() {
 		LOG.debug("Daemon running...");
-		slaveListener.listenForMessage();
+		agentListener.listenForMessage();
 
 		// TODO: Should be moved to another class.
 		// This daemon ony runs every time a message is received, which means
 		// it will not detect new nodes at a set interval
-		checkForNewHosts();
-	}
 
-	private void checkForNewHosts() {
 		// Update hosts every n-th run
-		if (hostUpdater < UPDATE_NODELIST_COUNTER) {
+		if(hostUpdater < UPDATE_NODELIST_COUNTER) {
 			hostUpdater++;
 		} else {
+			checkForNewHosts();
+			hostUpdater = 0;
+		}
+	}
+
+	protected void checkForNewHosts() {
 			// Update slaves-list
-			Set<CassandraHost> oldSlaves = slaves;
-			slaves = hostManager.getActiveHosts();
-			Set<CassandraHost> initSlaves = slaves;
+			Set<CassandraHost> oldSlaves = agents;
+			agents = hostManager.getActiveHosts();
+			Set<CassandraHost> initSlaves = agents;
 			initSlaves.removeAll(oldSlaves);
 
 			// Initialize any new slaves
 			if (!initSlaves.isEmpty()) {
 				initializeSlaves(initSlaves);
 			}
-
-			hostUpdater = 0;
-		}
 	}
 
 	/**
-	 * Send initialization-message to all slaves.
+	 * Send initialization-message to all slaves.<br>
+	 * Node should already be running.
 	 * 
 	 * @param nodes
 	 *            to initialize
 	 */
-	private void initializeSlaves(Set<CassandraHost> nodes) {
+	protected void initializeSlaves(Set<CassandraHost> nodes) {
 
 		// Construct slave-message
-		AgentMessage slaveMsg = new AgentMessage(AgentMessageType.STARTUP_NODE);
-		slaveMsg.put("intervall_timer", Config.intervall_timer_slave);
-		slaveMsg.put("threshold_breach_limit", Config.threshold_breach_limit);
-		slaveMsg.put("min_memory_usage", Config.min_memory_usage);
-		slaveMsg.put("max_memory_usage", Config.max_memory_usage);
-		slaveMsg.put("min_free_disk_space", Config.min_free_disk_space);
-		slaveMsg.put("max_free_disk_space", Config.max_free_disk_space);
-		slaveMsg.put("storage_location", Config.storage_location);
+		AgentMessage agentMsg = new AgentMessage(AgentMessageType.START_AGENT);
 
 		// Send message to all slaves
 		for (CassandraHost host : nodes) {
 			communicator = new Communicator(Config.master_input_port, Config.master_output_port);
-			communicator.sendMessage(host.getHost(), slaveMsg);
+			communicator.sendMessage(host.getHost(), agentMsg);
 			communicator = null;
 		}
 	}
@@ -120,7 +110,7 @@ public class AutoscaleDaemon implements Runnable {
 	 * 
 	 * @param listener
 	 */
-	private void initializeScaler(SlaveListener listener) {
+	protected void initializeScaler(AgentListener listener) {
 		scaler = new SimpleCassandraScaler(listener, hostManager);
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(scaler, 0, Config.intervall_timer_scaler, TimeUnit.SECONDS);
