@@ -25,14 +25,17 @@ public class CassandraHost implements Host {
 		this.port = port;
 	}
 
+	@Override
 	public String getHost() {
 		return this.host;
 	}
 
+	@Override
 	public String getIp() {
 		return this.host;
 	}
 
+	@Override
 	public Integer getPort() {
 		return this.port;
 	}

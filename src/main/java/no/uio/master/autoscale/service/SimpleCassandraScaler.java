@@ -73,8 +73,8 @@ public class SimpleCassandraScaler implements Scaler {
 				if (hostWeight.getScale() == Scale.UP) {
 
 					if (!hostManager.getInactiveHosts().isEmpty()) {
-						LOG.info("Scaling up extra node. " + hostWeight.getHost() + " is overloaded!");
 						CassandraHost host = hostManager.getInactiveHosts().iterator().next();
+						LOG.info("Adding {} to the cluster because {} is overloaded!",host.getHost(), hostWeight.getHost());
 						hostManager.addHostToCluster(host);
 						hostManager.updateActiveAndInactiveHosts();
 					} else {
@@ -83,7 +83,7 @@ public class SimpleCassandraScaler implements Scaler {
 
 				} else if (hostWeight.getScale() == Scale.DOWN) {
 					if (hostManager.getActiveHosts().size() > Config.min_number_of_nodes) {
-						LOG.info("Scaling down node " + hostWeight.getHost());
+						LOG.info("Removing {} from the cluster", hostWeight.getHost());
 						CassandraHost host = hostManager.getActiveHost(hostWeight.getHost());
 						hostManager.removeHostFromCluster(host);
 						hostManager.updateActiveAndInactiveHosts();

@@ -63,7 +63,7 @@ public class AgentListener {
 			updateStatus(msg);
 			break;
 		default:
-			LOG.debug("Status not implemented {}",msg.getType().toString());
+			LOG.warn("Status not implemented {}",msg.getType().toString());
 			break;
 		}
 
@@ -93,6 +93,7 @@ public class AgentListener {
 	 * 
 	 * @param msg
 	 */
+	@SuppressWarnings("unchecked")
 	public void updateStatus(AgentMessage msg) {
 		LOG.debug("Update status");
 		if (msg.getMap().isEmpty()) {
@@ -109,7 +110,7 @@ public class AgentListener {
 			break;
 
 		default:
-			LOG.debug("Status not found {}", status.toString());
+			LOG.warn("Status not found {}", status.toString());
 			break;
 		}
 	}
@@ -120,14 +121,14 @@ public class AgentListener {
 	 * @return
 	 */
 	public List<BreachMessage<?>> getBatchedBreachMessages() {
-		return this.batchedBreachMessages;
+		return batchedBreachMessages;
 	}
 
 	/**
 	 * Empty breach-messages list
 	 */
 	public void emptyBatchBreachMessageList() {
-		this.batchedBreachMessages = new ArrayList<BreachMessage<?>>();
+		batchedBreachMessages = new ArrayList<BreachMessage<?>>();
 	}
 
 	/**

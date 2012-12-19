@@ -28,10 +28,10 @@ public class AutoscaleINTTest {
 		// Make sure proper loopback is initialized for 127.0.0.2
 		
 		// Startup Cassandra-instance #2
-		//Runtime.getRuntime().exec("/Users/andreas/UiO/cassandra-runtime/2/apache-cassandra-1.1.5/bin/cassandra -f");
-		//Thread.sleep(1000);
-		//
-		//cassandraPID = getPID("/Users/andreas/UiO/cassandra-runtime/2/apache-cassandra-1.1.5");
+		Runtime.getRuntime().exec("/Users/andreas/UiO/cassandra-runtime/2/apache-cassandra-1.1.5/bin/cassandra -f");
+		Thread.sleep(1000);
+		
+		cassandraPID = getPID("/Users/andreas/UiO/cassandra-runtime/2/apache-cassandra-1.1.5");
 		
 		// Startup Autoscale-agent for Cassandra-instance #2
 		Runtime.getRuntime().exec("/Users/andreas/UiO/gitrepos/autoscale-agent/bin/autoscale");

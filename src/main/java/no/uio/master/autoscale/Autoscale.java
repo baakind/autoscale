@@ -25,13 +25,13 @@ public class Autoscale {
 	 * Default parameters
 	 */
 	public Autoscale() {
-		LOG.info("Initializing autoscaling with default properties...");
+		LOG.debug("Initializing autoscaling with default properties...");
 		init();
 	}
 	
 	
 	public Autoscale(Integer intervallTimerAgent, Integer intervallTimerScaler, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, String storageLocation, String initHost, Integer initPort) {
-		LOG.info("Initializing autoscaling...");
+		LOG.debug("Initializing autoscaling...");
 		
 		Config.intervall_timer_agent = intervallTimerAgent;
 		Config.intervall_timer_scaler = intervallTimerScaler;
@@ -51,7 +51,7 @@ public class Autoscale {
 		executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(instance, 0, 1, TimeUnit.SECONDS);
 		
-		LOG.info("Initializing autoscaling complete");
+		LOG.debug("Initializing autoscaling complete");
 	}
 	
 	public void shutdownAutoscaler() throws InterruptedException {
