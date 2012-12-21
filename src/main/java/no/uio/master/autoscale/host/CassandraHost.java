@@ -1,5 +1,7 @@
 package no.uio.master.autoscale.host;
 
+import no.uio.master.autoscale.config.Config;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CassandraHost implements Host {
 	private static Logger LOG = LoggerFactory.getLogger(CassandraHost.class);
-	private static final Integer DEFAULT_PORT = 9160;
+	private static final Integer DEFAULT_PORT = Config.agent_default_jmx_port;
 	
 	private String host;
 	private Integer port;

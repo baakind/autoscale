@@ -21,6 +21,9 @@ public class Config {
 	public static Integer master_input_port = 7798;
 	public static Integer master_output_port = 7799;
 	
+	/* Agent JMX-port */
+	public static Integer agent_default_jmx_port = 8001;
+	
 	/* Runtime configurations */
 	private static volatile Set<CassandraHost> activeHosts = new HashSet<CassandraHost>(0);
 	private static volatile Set<CassandraHost> inactiveHosts = new HashSet<CassandraHost>(0);
