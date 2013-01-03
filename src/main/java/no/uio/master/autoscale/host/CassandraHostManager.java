@@ -42,6 +42,9 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 		communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 		communicator.sendMessage(host.getHost(), msg);
 		communicator = null;
+		
+		Config.getActiveHosts().add(host);
+		Config.getInactiveHosts().remove(host);
 	}
 
 	@Override
@@ -53,6 +56,9 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 		communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 		communicator.sendMessage(host.getHost(), msg);
 		communicator = null;
+		
+		Config.getInactiveHosts().add(host);
+		Config.getActiveHosts().remove(host);
 	}
 
 	@Override

@@ -55,9 +55,14 @@ public class AgentListener {
 		communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 		CommunicatorObjectBundle obj = (CommunicatorObjectBundle) communicator.readMessage();
 		communicator = null;
-		
+
 		try {
 			AgentMessage msg = (AgentMessage) obj.getMessage();
+			if(null == msg) {
+				LOG.error("Failed to parse message");
+				return;
+			}
+			
 			msg.setSenderHost(obj.getSenderIp());
 			LOG.debug("Read message: " + msg);
 			
@@ -91,6 +96,8 @@ public class AgentListener {
 		}
 
 		BreachMessage<?> breachMessage = (BreachMessage<?>) msg.getMap().entrySet().iterator().next().getValue();
+		breachMessage.setSenderHost(msg.getSenderHost());
+		
 		LOG.debug("Message read: " + breachMessage);
 		breachMessage.setDate(new Date());
 		batchedBreachMessages.add(breachMessage);

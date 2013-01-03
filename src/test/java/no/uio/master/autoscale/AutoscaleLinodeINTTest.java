@@ -22,6 +22,7 @@ import org.junit.Test;
 public class AutoscaleLinodeINTTest {
 	private static Autoscale scaler;
 
+
 	@Test
 	public void testStartAutoscaler() throws InterruptedException {
 		Integer intervallTimerAgent = 1;
@@ -30,7 +31,7 @@ public class AutoscaleLinodeINTTest {
 		Integer minNumberOfNodes = 1;
 		Double minMemoryUsage = 10.0;
 		Double maxMemoryUsage = 90.0;
-		Long minDiskSpace = 1000L;
+		Long minDiskSpace = 100L;
 		Long maxDiskSpace = 200000L;
 		String initHost = "97.107.133.122"; //109.74.200.57
 		Integer initPort = 8002;
@@ -50,10 +51,16 @@ public class AutoscaleLinodeINTTest {
 		msg.put("status", AgentStatus.LIVE_NODES);
 		
 		HostManager<CassandraHost> hostManager = new CassandraHostManager();
+		Set<CassandraHost> activeHosts;
 		hostManager.updateActiveAndInactiveHosts();
-		Thread.sleep(20000L);
-		Set<CassandraHost> activeHosts = hostManager.getActiveHosts();
+
+		Thread.sleep(800L); // Before host is removed, but after retrieved result
+		activeHosts = hostManager.getActiveHosts();
 		Assert.assertEquals(2, activeHosts.size());
+		
+		Thread.sleep(10000L); // Host will be removed
+		activeHosts = hostManager.getActiveHosts();
+		Assert.assertEquals(1, activeHosts.size());
 	}
 
 }
