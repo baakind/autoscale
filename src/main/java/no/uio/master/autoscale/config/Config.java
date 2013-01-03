@@ -15,14 +15,13 @@ public class Config {
 	public static Double max_memory_usage = 90.0;
 	public static Long min_free_disk_space = 60L;
 	public static Long max_free_disk_space = 20000L;
-	public static String storage_location = "/";
 	
-	/* Comunication-ports */
+	/* Communication-ports */
 	public static Integer master_input_port = 7798;
 	public static Integer master_output_port = 7799;
 	
 	/* Agent JMX-port */
-	public static Integer agent_default_jmx_port = 8001;
+	public static Integer agent_default_jmx_port = 7199;
 	
 	/* Runtime configurations */
 	private static volatile Set<CassandraHost> activeHosts = new HashSet<CassandraHost>(0);

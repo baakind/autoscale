@@ -67,12 +67,11 @@ public class AutoscaleINTTest {
 		Double maxMemoryUsage = 90.0;
 		Long minDiskSpace = 1000L;
 		Long maxDiskSpace = 200000L;
-		String storageLocation = "/";
 		String initHost = "127.0.0.2";
 		Integer initPort = 8002;
 
 		scaler = new Autoscale(intervallTimerAgent, intervallTimerScaler, thresholdBreachLimit,
-				minNumberOfNodes, minMemoryUsage, maxMemoryUsage, minDiskSpace, maxDiskSpace, storageLocation,
+				minNumberOfNodes, minMemoryUsage, maxMemoryUsage, minDiskSpace, maxDiskSpace,
 				initHost, initPort);
 		
 		Thread.sleep(10000L);

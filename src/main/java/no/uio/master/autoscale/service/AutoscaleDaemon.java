@@ -56,11 +56,8 @@ public class AutoscaleDaemon implements Runnable {
 		LOG.debug("Daemon running...");
 		agentListener.listenForMessage();
 
-		// TODO: Should be moved to another class.
-		// This daemon ony runs every time a message is received, which means
-		// it will not detect new nodes at a set interval
-
 		// Update hosts every n-th run
+		// frequency depends on message-retrieval
 		if(hostUpdater < UPDATE_NODELIST_COUNTER) {
 			hostUpdater++;
 		} else {

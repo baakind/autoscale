@@ -30,7 +30,7 @@ public class Autoscale {
 	}
 	
 	
-	public Autoscale(Integer intervallTimerAgent, Integer intervallTimerScaler, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, String storageLocation, String initHost, Integer initPort) {
+	public Autoscale(Integer intervallTimerAgent, Integer intervallTimerScaler, Integer thresholdBreachLimit, Integer minNumberOfNodes, Double minMemoryUsage, Double maxMemoryUsage, Long minDiskSpace, Long maxDiskSpace, String initHost, Integer initPort) {
 		LOG.debug("Initializing autoscaling...");
 		
 		Config.intervall_timer_agent = intervallTimerAgent;
@@ -41,7 +41,6 @@ public class Autoscale {
 		Config.max_memory_usage = maxMemoryUsage;
 		Config.min_free_disk_space = minDiskSpace;
 		Config.max_free_disk_space = maxDiskSpace;
-		Config.storage_location = storageLocation;
 		Config.getActiveHosts().add(new CassandraHost(initHost, initPort));
 		init();
 	}

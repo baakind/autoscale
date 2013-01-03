@@ -17,7 +17,5 @@ public class AgentUtils {
 		agentMsg.put("max_memory_usage", Config.max_memory_usage);
 		agentMsg.put("min_free_disk_space", Config.min_free_disk_space);
 		agentMsg.put("max_free_disk_space", Config.max_free_disk_space);
-		agentMsg.put("storage_location", Config.storage_location);
-		
 	}
 }

@@ -14,6 +14,7 @@ import no.uio.master.autoscale.message.AgentMessage;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.AgentStatus;
 import no.uio.master.autoscale.net.Communicator;
+import no.uio.master.autoscale.util.CommunicatorObjectBundle;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class AgentListener {
 
 	private static Logger LOG = LoggerFactory.getLogger(AgentListener.class);
-	private static Communicator communicator;
+	private Communicator communicator;
 
 	/**
 	 * Contains the current batch of breachMessages received.<br>
@@ -44,8 +45,6 @@ public class AgentListener {
 	private static List<BreachMessage<?>> batchedBreachMessages = new ArrayList<BreachMessage<?>>();
 
 	public AgentListener() {
-		LOG.debug("Initialize Slave-listener");
-		communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 	}
 
 	/**
@@ -53,20 +52,29 @@ public class AgentListener {
 	 */
 	public void listenForMessage() {
 		LOG.debug("Listen for incomming messages...");
-		AgentMessage msg = (AgentMessage) communicator.readMessage();
-
-		switch (msg.getType()) {
-		case BREACH_MESSAGE:
-			storeMessage(msg);
-			break;
-		case STATUS:
-			updateStatus(msg);
-			break;
-		default:
-			LOG.warn("Status not implemented {}",msg.getType().toString());
-			break;
+		communicator = new Communicator(Config.master_input_port, Config.master_output_port);
+		CommunicatorObjectBundle obj = (CommunicatorObjectBundle) communicator.readMessage();
+		communicator = null;
+		
+		try {
+			AgentMessage msg = (AgentMessage) obj.getMessage();
+			msg.setSenderHost(obj.getSenderIp());
+			LOG.debug("Read message: " + msg);
+			
+			switch (msg.getType()) {
+			case BREACH_MESSAGE:
+				storeMessage(msg);
+				break;
+			case STATUS:
+				updateStatus(msg);
+				break;
+			default:
+				LOG.warn("Status not implemented {}",msg.getType().toString());
+				break;
+			}
+		} catch (Exception e) {
+			LOG.error("Failed to read message ",e);
 		}
-
 	}
 
 	/**
