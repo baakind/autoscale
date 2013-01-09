@@ -21,6 +21,12 @@ import org.junit.Test;
  */
 public class AutoscaleLinodeINTTest {
 	private static Autoscale scaler;
+	
+	@AfterClass
+	public static void tearDown() throws InterruptedException {
+		Thread.sleep(20000);
+		scaler = null;
+	}
 
 
 	@Test
@@ -54,10 +60,6 @@ public class AutoscaleLinodeINTTest {
 		Set<CassandraHost> activeHosts;
 		hostManager.updateActiveAndInactiveHosts();
 
-		Thread.sleep(800L); // Before host is removed, but after retrieved result
-		activeHosts = hostManager.getActiveHosts();
-		Assert.assertEquals(2, activeHosts.size());
-		
 		Thread.sleep(10000L); // Host will be removed
 		activeHosts = hostManager.getActiveHosts();
 		Assert.assertEquals(1, activeHosts.size());
