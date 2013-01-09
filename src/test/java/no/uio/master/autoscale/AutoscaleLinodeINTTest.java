@@ -40,7 +40,7 @@ public class AutoscaleLinodeINTTest {
 				minNumberOfNodes, minMemoryUsage, maxMemoryUsage, minDiskSpace, maxDiskSpace,
 				initHost, initPort);
 		
-		Thread.sleep(10000L);
+		Thread.sleep(15000L);
 		
 		
 	}

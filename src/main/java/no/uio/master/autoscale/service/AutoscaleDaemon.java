@@ -46,7 +46,7 @@ public class AutoscaleDaemon implements Runnable {
 
 	private void init() {
 		hostManager = new CassandraHostManager();
-		initializeSlaves(hostManager.getActiveHosts());
+		initializeAgents(hostManager.getActiveHosts());
 		agentListener = new AgentListener();
 		initializeScaler(agentListener);
 	}
@@ -75,7 +75,7 @@ public class AutoscaleDaemon implements Runnable {
 
 			// Initialize any new slaves
 			if (!initSlaves.isEmpty()) {
-				initializeSlaves(initSlaves);
+				initializeAgents(initSlaves);
 			}
 	}
 
@@ -86,7 +86,7 @@ public class AutoscaleDaemon implements Runnable {
 	 * @param nodes
 	 *            to initialize
 	 */
-	protected void initializeSlaves(Set<CassandraHost> nodes) {
+	protected void initializeAgents(Set<CassandraHost> nodes) {
 
 		// Construct slave-message
 		AgentMessage agentMsg = new AgentMessage(AgentMessageType.START_AGENT);
