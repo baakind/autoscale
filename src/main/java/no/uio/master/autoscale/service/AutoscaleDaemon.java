@@ -80,7 +80,7 @@ public class AutoscaleDaemon implements Runnable {
 	}
 
 	/**
-	 * Send initialization-message to all slaves.<br>
+	 * Send initialization-message to all agents.<br>
 	 * Node should already be running.
 	 * 
 	 * @param nodes
@@ -88,7 +88,7 @@ public class AutoscaleDaemon implements Runnable {
 	 */
 	protected void initializeAgents(Set<CassandraHost> nodes) {
 
-		// Construct slave-message
+		// Construct agent-message
 		AgentMessage agentMsg = new AgentMessage(AgentMessageType.START_AGENT);
 
 		// Send message to all slaves
@@ -101,7 +101,7 @@ public class AutoscaleDaemon implements Runnable {
 
 	/**
 	 * Initialize the scaler, which will run alongside the autoscaler.<br>
-	 * The scaler will collect received breach-messages from the SlaveListener
+	 * The scaler will collect received breach-messages from the AgentListener
 	 * at a given interval, and perform analysis upon messages, and eventually
 	 * perform scaling of the cluster, at the desired locations.
 	 * 

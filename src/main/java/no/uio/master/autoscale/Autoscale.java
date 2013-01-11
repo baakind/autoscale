@@ -39,8 +39,8 @@ public class Autoscale {
 		Config.min_number_of_nodes = minNumberOfNodes;
 		Config.min_memory_usage = minMemoryUsage;
 		Config.max_memory_usage = maxMemoryUsage;
-		Config.min_free_disk_space = minDiskSpace;
-		Config.max_free_disk_space = maxDiskSpace;
+		Config.min_disk_space_used = minDiskSpace;
+		Config.max_disk_space_used = maxDiskSpace;
 		Config.getActiveHosts().add(new CassandraHost(initHost, initPort));
 		init();
 	}

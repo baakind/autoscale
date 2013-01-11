@@ -39,7 +39,8 @@ public class AutoscaleLinodeINTTest {
 		Double maxMemoryUsage = 90.0;
 		Long minDiskSpace = 100L;
 		Long maxDiskSpace = 200000L;
-		String initHost = "97.107.133.122"; //109.74.200.57
+		String initHost = "97.107.133.122";
+		//String initHost = "109.74.200.57";
 		Integer initPort = 8002;
 
 		scaler = new Autoscale(intervallTimerAgent, intervallTimerScaler, thresholdBreachLimit,

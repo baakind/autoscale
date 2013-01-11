@@ -15,7 +15,7 @@ public class AgentUtils {
 		agentMsg.put("threshold_breach_limit", Config.threshold_breach_limit);
 		agentMsg.put("min_memory_usage", Config.min_memory_usage);
 		agentMsg.put("max_memory_usage", Config.max_memory_usage);
-		agentMsg.put("min_free_disk_space", Config.min_free_disk_space);
-		agentMsg.put("max_free_disk_space", Config.max_free_disk_space);
+		agentMsg.put("min_disk_space_used", Config.min_disk_space_used);
+		agentMsg.put("max_disk_space_used", Config.max_disk_space_used);
 	}
 }
