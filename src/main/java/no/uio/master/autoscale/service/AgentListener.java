@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author andreas
  */
-public class AgentListener {
+public class AgentListener implements Runnable {
 
 	private static Logger LOG = LoggerFactory.getLogger(AgentListener.class);
 	private Communicator communicator;
@@ -190,6 +190,11 @@ public class AgentListener {
 		}
 
 		return set;
+	}
+
+	@Override
+	public void run() {
+		listenForMessage();
 	}
 
 }

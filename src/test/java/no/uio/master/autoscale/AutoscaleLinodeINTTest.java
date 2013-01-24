@@ -11,7 +11,7 @@ import no.uio.master.autoscale.message.enumerator.AgentStatus;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -24,7 +24,6 @@ public class AutoscaleLinodeINTTest {
 	
 	@AfterClass
 	public static void tearDown() throws InterruptedException {
-		Thread.sleep(20000);
 		scaler = null;
 	}
 
@@ -47,12 +46,15 @@ public class AutoscaleLinodeINTTest {
 				minNumberOfNodes, minMemoryUsage, maxMemoryUsage, minDiskSpace, maxDiskSpace,
 				initHost, initPort);
 		
-		Thread.sleep(15000L);
+		// As long as the test runs
+		Long minutes = 15L;
+		Long sleepTime = minutes * 60000L;
+		Thread.sleep(sleepTime);
 		
 		
 	}
 	
-	@Test
+	@Ignore
 	public void testGetActiveNodes() throws InterruptedException {
 		AgentMessage msg = new AgentMessage(AgentMessageType.STATUS);
 		msg.put("status", AgentStatus.LIVE_NODES);

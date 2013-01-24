@@ -47,7 +47,7 @@ public class AutoscaleDaemon implements Runnable {
 	private void init() {
 		hostManager = new CassandraHostManager();
 		initializeAgents(hostManager.getActiveHosts());
-		agentListener = new AgentListener();
+		initalizeListener();
 		initializeScaler(agentListener);
 	}
 
@@ -111,6 +111,12 @@ public class AutoscaleDaemon implements Runnable {
 		scaler = new SimpleCassandraScaler(listener, hostManager);
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(scaler, 0, Config.intervall_timer_scaler, TimeUnit.SECONDS);
+	}
+	
+	protected void initalizeListener() {
+		agentListener = new AgentListener();
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(agentListener, 0, 1, TimeUnit.SECONDS);
 	}
 
 }
