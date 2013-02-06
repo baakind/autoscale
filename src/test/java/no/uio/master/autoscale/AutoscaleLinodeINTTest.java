@@ -1,17 +1,5 @@
 package no.uio.master.autoscale;
 
-import java.util.Set;
-
-import no.uio.master.autoscale.host.CassandraHost;
-import no.uio.master.autoscale.host.CassandraHostManager;
-import no.uio.master.autoscale.host.HostManager;
-import no.uio.master.autoscale.message.AgentMessage;
-import no.uio.master.autoscale.message.enumerator.AgentMessageType;
-import no.uio.master.autoscale.message.enumerator.AgentStatus;
-
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -20,13 +8,6 @@ import org.junit.Test;
  *
  */
 public class AutoscaleLinodeINTTest {
-	private static Autoscale scaler;
-	
-	@AfterClass
-	public static void tearDown() throws InterruptedException {
-		scaler = null;
-	}
-
 
 	@Test
 	public void testStartAutoscaler() throws InterruptedException {
@@ -36,15 +17,18 @@ public class AutoscaleLinodeINTTest {
 		Integer minNumberOfNodes = 1;
 		Double minMemoryUsage = 10.0;
 		Double maxMemoryUsage = 90.0;
-		Long minDiskSpace = 100L;
+		Long minDiskSpace = 200L;
 		Long maxDiskSpace = 200000L;
-		String initHost = "97.107.133.122";
-		//String initHost = "109.74.200.57";
-		Integer initPort = 8002;
 
-		scaler = new Autoscale(intervallTimerAgent, intervallTimerScaler, thresholdBreachLimit,
+		// Init Node 1
+		new Autoscale(intervallTimerAgent, intervallTimerScaler, thresholdBreachLimit,
 				minNumberOfNodes, minMemoryUsage, maxMemoryUsage, minDiskSpace, maxDiskSpace,
-				initHost, initPort);
+				"97.107.133.122", 8002);
+		
+		// Init Node 2
+		new Autoscale(intervallTimerAgent, intervallTimerScaler, thresholdBreachLimit,
+				minNumberOfNodes, minMemoryUsage, maxMemoryUsage, minDiskSpace, maxDiskSpace,
+				"109.74.200.57", 8002);
 		
 		// As long as the test runs
 		Long minutes = 15L;
@@ -52,20 +36,6 @@ public class AutoscaleLinodeINTTest {
 		Thread.sleep(sleepTime);
 		
 		
-	}
-	
-	@Ignore
-	public void testGetActiveNodes() throws InterruptedException {
-		AgentMessage msg = new AgentMessage(AgentMessageType.STATUS);
-		msg.put("status", AgentStatus.LIVE_NODES);
-		
-		HostManager<CassandraHost> hostManager = new CassandraHostManager();
-		Set<CassandraHost> activeHosts;
-		hostManager.updateActiveAndInactiveHosts();
-
-		Thread.sleep(10000L); // Host will be removed
-		activeHosts = hostManager.getActiveHosts();
-		Assert.assertEquals(1, activeHosts.size());
 	}
 
 }
