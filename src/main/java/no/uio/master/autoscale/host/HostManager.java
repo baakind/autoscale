@@ -10,31 +10,31 @@ import java.util.Set;
  *
  * @param <H>
  */
-public interface HostManager<H> {
+public interface HostManager {
 
 	/**
 	 * Retrieve all active hosts
 	 * @return
 	 */
-	public Set<H> getActiveHosts();
+	public Set<Host> getActiveHosts();
 	
 	/**
 	 * Get all inactive hosts
 	 * @return
 	 */
-	public Set<H> getInactiveHosts();
+	public Set<Host> getInactiveHosts();
 	
 	/**
 	 * Add <tt>host</tt> to the cluster
 	 * @param host
 	 */
-	public void addHostToCluster(H host);
+	public void addHostToCluster(Host host);
 	
 	/**
 	 * Remove <tt>host</tt> from the cluster
 	 * @param host
 	 */
-	public void removeHostFromCluster(H host);
+	public void removeHostFromCluster(Host host);
 	
 	/**
 	 * Get <tt>host</tt> from active-hosts. 
@@ -42,7 +42,7 @@ public interface HostManager<H> {
 	 * @param host
 	 * @return
 	 */
-	public H getActiveHost(String host);
+	public Host getActiveHost(String host);
 	
 	/**
 	 * Get <tt>host</tt> from inactive-hosts.
@@ -50,7 +50,7 @@ public interface HostManager<H> {
 	 * @param host
 	 * @return
 	 */
-	public H getInactiveHost(String host);
+	public Host getInactiveHost(String host);
 	
 	/**
 	 * Initialize process of updating active- and inactive hosts.

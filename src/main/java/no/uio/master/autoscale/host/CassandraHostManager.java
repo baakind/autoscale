@@ -12,7 +12,7 @@ import no.uio.master.autoscale.util.AgentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraHostManager implements HostManager<CassandraHost> {
+public class CassandraHostManager implements HostManager {
 	private static Logger LOG = LoggerFactory.getLogger(CassandraHostManager.class);
 
 	private Communicator communicator;
@@ -21,19 +21,19 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	}
 
 	@Override
-	public Set<CassandraHost> getActiveHosts() {
+	public Set<Host> getActiveHosts() {
 		LOG.debug("Active hosts: " + Config.getActiveHosts().size());
 		return Config.getActiveHosts();
 	}
 
 	@Override
-	public Set<CassandraHost> getInactiveHosts() {
+	public Set<Host> getInactiveHosts() {
 		LOG.debug("Inactive hosts:" + Config.getInactiveHosts().size());
 		return Config.getInactiveHosts();
 	}
 
 	@Override
-	public void addHostToCluster(CassandraHost host) {
+	public void addHostToCluster(Host host) {
 		LOG.info("Adding " + host.getHost() + " to the cluster");
 		
 		AgentMessage msg = new AgentMessage(AgentMessageType.STARTUP_NODE);
@@ -48,7 +48,7 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	}
 
 	@Override
-	public void removeHostFromCluster(CassandraHost host) {
+	public void removeHostFromCluster(Host host) {
 		LOG.info("Removing " + host.getHost() + " from the cluster");
 		
 		AgentMessage msg = new AgentMessage(AgentMessageType.SHUTDOWN_NODE);
@@ -62,8 +62,8 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	}
 
 	@Override
-	public CassandraHost getActiveHost(String host) {
-		for (CassandraHost cassandraHost : Config.getActiveHosts()) {
+	public Host getActiveHost(String host) {
+		for (Host cassandraHost : Config.getActiveHosts()) {
 			if (host.equalsIgnoreCase(cassandraHost.getHost())) {
 				return cassandraHost;
 			}
@@ -74,8 +74,8 @@ public class CassandraHostManager implements HostManager<CassandraHost> {
 	}
 	
 	@Override
-	public CassandraHost getInactiveHost(String host) {
-		for (CassandraHost cassandraHost : Config.getInactiveHosts()) {
+	public Host getInactiveHost(String host) {
+		for (Host cassandraHost : Config.getInactiveHosts()) {
 			if (host.equalsIgnoreCase(cassandraHost.getHost())) {
 				return cassandraHost;
 			}

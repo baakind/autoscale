@@ -11,4 +11,8 @@ public interface Host {
 	public String getIp();
 	
 	public Integer getPort();
+	
+	public void setHost(String host);
+	
+	public void setPort(Integer port);
 }

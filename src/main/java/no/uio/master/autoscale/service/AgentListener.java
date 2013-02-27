@@ -10,6 +10,7 @@ import java.util.Set;
 
 import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.host.CassandraHost;
+import no.uio.master.autoscale.host.Host;
 import no.uio.master.autoscale.message.AgentMessage;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.AgentStatus;
@@ -151,7 +152,7 @@ public class AgentListener implements Runnable {
 	 */
 	private void updateActiveInactiveHosts(List<String> newActiveHosts) {
 		LOG.debug("Update active/inactive hosts");
-		Set<CassandraHost> tempActiveNodes = Config.getActiveHosts();
+		Set<Host> tempActiveNodes = Config.getActiveHosts();
 
 		// Update active hosts
 		Config.setActiveHosts(generateHostFromString(newActiveHosts));
@@ -175,12 +176,12 @@ public class AgentListener implements Runnable {
 	 * @param hosts
 	 * @return
 	 */
-	private Set<CassandraHost> generateHostFromString(List<String> hosts) {
-		Set<CassandraHost> set = new HashSet<CassandraHost>();
+	private Set<Host> generateHostFromString(List<String> hosts) {
+		Set<Host> set = new HashSet<Host>();
 		for (String hostString : hosts) {
-			CassandraHost host = new CassandraHost(hostString);
+			Host host = new CassandraHost(hostString);
 			if (Config.getInactiveHosts().contains(host)) {
-				for (CassandraHost h : Config.getInactiveHosts()) {
+				for (Host h : Config.getInactiveHosts()) {
 					if (host.equals(h)) {
 						host.setPort(h.getPort());
 					}

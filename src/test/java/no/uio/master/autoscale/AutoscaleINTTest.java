@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import no.uio.master.autoscale.host.CassandraHost;
 import no.uio.master.autoscale.host.CassandraHostManager;
+import no.uio.master.autoscale.host.Host;
 import no.uio.master.autoscale.host.HostManager;
 import no.uio.master.autoscale.message.AgentMessage;
 import no.uio.master.autoscale.message.enumerator.AgentMessageType;
@@ -21,7 +21,7 @@ public class AutoscaleINTTest {
 	private static Integer cassandraPID;
 	private static Integer agentPID;
 	private static Autoscale scaler;
-	private static HostManager<CassandraHost> hostManager;
+	private static HostManager hostManager;
 	
 	@BeforeClass
 	public static void setUp() throws InterruptedException, IOException {
@@ -85,7 +85,7 @@ public class AutoscaleINTTest {
 		hostManager = new CassandraHostManager();
 		hostManager.updateActiveAndInactiveHosts();
 		Thread.sleep(10000L);
-		Set<CassandraHost> activeHosts = hostManager.getActiveHosts();
+		Set<Host> activeHosts = hostManager.getActiveHosts();
 		Assert.assertEquals(3, activeHosts.size());
 	}
 	

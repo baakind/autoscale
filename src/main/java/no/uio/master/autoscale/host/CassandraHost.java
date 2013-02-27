@@ -42,10 +42,12 @@ public class CassandraHost implements Host {
 		return this.port;
 	}
 
+	@Override
 	public void setHost(String host) {
 		this.host = host;
 	}
 
+	@Override
 	public void setPort(Integer port) {
 		this.port = port;
 	}

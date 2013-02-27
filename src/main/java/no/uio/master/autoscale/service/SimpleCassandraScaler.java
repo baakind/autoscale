@@ -9,7 +9,8 @@ import java.util.Map;
 
 import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.host.CassandraHost;
-import no.uio.master.autoscale.host.CassandraHostManager;
+import no.uio.master.autoscale.host.Host;
+import no.uio.master.autoscale.host.HostManager;
 import no.uio.master.autoscale.message.BreachMessage;
 import no.uio.master.autoscale.message.enumerator.BreachType;
 import no.uio.master.autoscale.util.HostWeight;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class SimpleCassandraScaler implements Scaler {
 	private static Logger LOG = LoggerFactory.getLogger(SimpleCassandraScaler.class);
 	private static AgentListener slaveListener;
-	private static CassandraHostManager hostManager;
+	private static HostManager hostManager;
 
 	private static List<BreachMessage<?>> breachMessages;
 	private static Map<BreachType, Integer> priorities = new HashMap<BreachType, Integer>();
@@ -36,7 +37,7 @@ public class SimpleCassandraScaler implements Scaler {
 		priorities.put(BreachType.MIN_DISK_USAGE, -2);
 	}
 
-	public SimpleCassandraScaler(AgentListener listener, CassandraHostManager hManager) {
+	public SimpleCassandraScaler(AgentListener listener, HostManager hManager) {
 		LOG.debug("Initialize scaler");
 		slaveListener = listener;
 		hostManager = hManager;
@@ -73,7 +74,7 @@ public class SimpleCassandraScaler implements Scaler {
 				if (hostWeight.getScale() == Scale.UP) {
 
 					if (!hostManager.getInactiveHosts().isEmpty()) {
-						CassandraHost host = hostManager.getInactiveHosts().iterator().next();
+						Host host = hostManager.getInactiveHosts().iterator().next();
 						LOG.info("Adding {} to the cluster because {} is overloaded!",host.getHost(), hostWeight.getHost());
 						hostManager.addHostToCluster(host);
 						hostManager.updateActiveAndInactiveHosts();
@@ -84,7 +85,7 @@ public class SimpleCassandraScaler implements Scaler {
 				} else if (hostWeight.getScale() == Scale.DOWN) {
 					if (hostManager.getActiveHosts().size() > Config.min_number_of_nodes) {
 						LOG.info("Removing {} from the cluster", hostWeight.getHost());
-						CassandraHost host = hostManager.getActiveHost(hostWeight.getHost());
+						Host host = hostManager.getActiveHost(hostWeight.getHost());
 						hostManager.removeHostFromCluster(host);
 						hostManager.updateActiveAndInactiveHosts();
 					} else {

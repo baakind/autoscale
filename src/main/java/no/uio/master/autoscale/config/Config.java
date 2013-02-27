@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.uio.master.autoscale.host.CassandraHost;
+import no.uio.master.autoscale.host.Host;
 
 public class Config {
 	/* Configurations changed by constructor arguments */
@@ -24,28 +25,28 @@ public class Config {
 	public static Integer agent_default_jmx_port = 7199;
 	
 	/* Runtime configurations */
-	private static volatile Set<CassandraHost> activeHosts = new HashSet<CassandraHost>(0);
-	private static volatile Set<CassandraHost> inactiveHosts = new HashSet<CassandraHost>(0);
+	private static volatile Set<Host> activeHosts = new HashSet<Host>(0);
+	private static volatile Set<Host> inactiveHosts = new HashSet<Host>(0);
 	
-	public static void setActiveHosts(Set<CassandraHost> activeHosts) {
+	public static void setActiveHosts(Set<Host> activeHosts) {
 		synchronized (activeHosts) {
 			Config.activeHosts = activeHosts;
 		}
 	}
 	
-	public static Set<CassandraHost> getActiveHosts() {
+	public static Set<Host> getActiveHosts() {
 		synchronized(activeHosts) {
 			return Config.activeHosts;
 		}
 	}
 	
-	public static void setInactiveHosts(Set<CassandraHost> inactiveHosts) {
+	public static void setInactiveHosts(Set<Host> inactiveHosts) {
 		synchronized (Config.class) {
 			Config.inactiveHosts = inactiveHosts;
 		}
 	}
 	
-	public static Set<CassandraHost> getInactiveHosts() {
+	public static Set<Host> getInactiveHosts() {
 		synchronized(Config.class) {
 			return Config.inactiveHosts;
 		}

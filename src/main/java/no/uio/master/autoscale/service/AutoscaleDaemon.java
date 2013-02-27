@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import no.uio.master.autoscale.config.Config;
 import no.uio.master.autoscale.host.CassandraHost;
 import no.uio.master.autoscale.host.CassandraHostManager;
+import no.uio.master.autoscale.host.Host;
+import no.uio.master.autoscale.host.HostManager;
 import no.uio.master.autoscale.message.AgentMessage;
 import no.uio.master.autoscale.message.enumerator.AgentMessageType;
 import no.uio.master.autoscale.net.Communicator;
@@ -23,8 +25,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AutoscaleDaemon implements Runnable {
 	private static Logger LOG = LoggerFactory.getLogger(AutoscaleDaemon.class);
-	private static CassandraHostManager hostManager;
-	private static Set<CassandraHost> agents;
+	private static HostManager hostManager;
+	private static Set<Host> agents;
 
 	private static AgentListener agentListener;
 	private static Communicator communicator;
@@ -68,9 +70,9 @@ public class AutoscaleDaemon implements Runnable {
 
 	protected void checkForNewHosts() {
 			// Update slaves-list
-			Set<CassandraHost> oldSlaves = agents;
+			Set<Host> oldSlaves = agents;
 			agents = hostManager.getActiveHosts();
-			Set<CassandraHost> initSlaves = agents;
+			Set<Host> initSlaves = agents;
 			initSlaves.removeAll(oldSlaves);
 
 			// Initialize any new slaves
@@ -86,13 +88,13 @@ public class AutoscaleDaemon implements Runnable {
 	 * @param nodes
 	 *            to initialize
 	 */
-	protected void initializeAgents(Set<CassandraHost> nodes) {
+	protected void initializeAgents(Set<Host> nodes) {
 
 		// Construct agent-message
 		AgentMessage agentMsg = new AgentMessage(AgentMessageType.START_AGENT);
 
 		// Send message to all slaves
-		for (CassandraHost host : nodes) {
+		for (Host host : nodes) {
 			communicator = new Communicator(Config.master_input_port, Config.master_output_port);
 			communicator.sendMessage(host.getHost(), agentMsg);
 			communicator = null;
