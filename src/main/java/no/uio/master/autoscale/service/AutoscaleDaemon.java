@@ -30,7 +30,7 @@ public class AutoscaleDaemon implements Runnable {
 
 	private static AgentListener agentListener;
 	private static Communicator communicator;
-	private static SimpleCassandraScaler scaler;
+	private static Scaler scaler;
 
 	private static int hostUpdater = 0;
 	private final int UPDATE_NODELIST_COUNTER = 5;
