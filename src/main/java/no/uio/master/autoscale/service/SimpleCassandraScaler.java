@@ -130,12 +130,11 @@ public class SimpleCassandraScaler implements Scaler {
 		}
 		/*
 		 * Scale up if: scaleUp > scaleDown, or scaleUp == scaleDown Scale down
-		 * if: scaleUp < scaleDown, or scaleUp == scaleDown
+		 * else if: scaleUp < scaleDown, or scaleUp == scaleDown
 		 */
 		if (scaleUpWeight >= scaleDownWeightAbs && !scaleUp.isEmpty()) {
 			scale.add(scaleUp.get(scaleUp.size() - 1));
-		}
-		if (scaleUpWeight <= scaleDownWeightAbs && !scaleDown.isEmpty()) {
+		} else if (scaleUpWeight <= scaleDownWeightAbs && !scaleDown.isEmpty()) {
 			scale.add(scaleDown.get(0));
 		}
 		return scale;
