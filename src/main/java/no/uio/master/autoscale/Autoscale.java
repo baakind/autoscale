@@ -24,8 +24,9 @@ public class Autoscale {
 	/**
 	 * Default parameters
 	 */
-	public Autoscale() {
+	public Autoscale(String initHost, Integer initPort) {
 		LOG.debug("Initializing autoscaling with default properties...");
+		Config.getActiveHosts().add(new CassandraHost(initHost, initPort));
 		init();
 	}
 	
